@@ -21,7 +21,20 @@ def index(request):
 
 
 def dashboard(request):
-    return render(request, 'ums/dashboard.html', {})
+
+    logged_in_user =  get_logged_in_user()
+
+    return render(request, 'ums/dashboard.html', {'userID': logged_in_user})
 
 def admin(request):
-    return render(request, 'ums/admin.html', {})
+    users = Users.objects.all()
+
+    logged_in_user = get_logged_in_user()
+
+    print(logged_in_user)
+
+    return render(request, 'ums/admin.html', {'users':users, 'userID': logged_in_user})
+
+
+def get_logged_in_user():
+    return Users.objects.get(id=1)
