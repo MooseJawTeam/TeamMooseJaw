@@ -23,3 +23,26 @@ sudo apt install python3-django
  python3 manage.py runserver
 
 ```
+## Query Database 
+These are instructions for WSL to connect to the database and run queries. The process should be similar for Mac/Linux Systems.
+
+Message `Nightterrors` on Discord to get the username and password for the database. You'll need them to connect.
+
+```
+# Install MySQL cli
+sudo apt install mysql-server
+
+# Connect to the database
+ mysql --host=moosejawdb.mysql.database.azure.com --user=<USER> --password=<PASSWORD> --port=3306 --database=mjapp
+ 
+# List dbs, tables, and columns
+mysql> show databases;
+mysql> show tables;
+mysql> show columns from users;
+
+# Run query
+mysql> select * from users;
+ 
+# Exit
+mysql> exit
+```
