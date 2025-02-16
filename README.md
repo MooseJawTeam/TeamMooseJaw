@@ -4,6 +4,8 @@ Group Repository for COSC 4353 Software Design
 ## Run Locally
 These are instructions for WSL but the process should be similar for Mac/Linux systems.
 
+Note that you'll need to set environment variables with the database username and password. Message `Nightterrors` on Discord to get the username and password for the database.
+
 ```
 # Open Powershell and enter WSL
 wsl
@@ -16,11 +18,16 @@ cd django_app
 # Install dependencies if you don't already have them
 sudo apt install python3
 sudo apt install python3-pip
-pip3 install django
 sudo apt install python3-django
+sudo apt-get install python3-dev default-libmysqlclient-dev build-essential
+pip3 install django
+pip3 install mysqlclient
+
 
 # Start server
- python3 manage.py runserver
+export DB_USER=<USER>
+export DB_PASSWORD=<PASSWORD>
+python3 manage.py runserver
 
 ```
 ## Query Database 
