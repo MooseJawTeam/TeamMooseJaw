@@ -1,5 +1,6 @@
 from django.http import HttpResponse
 from .models import Users
+from django.shortcuts import render
 
 # Create your views here.
 def index(request):
@@ -20,7 +21,7 @@ def index(request):
 
 
 def dashboard(request):
-    return HttpResponse("Welcome to your Dashboard")
+    return render(request, 'ums/dashboard.html', {})
 
 def admin(request):
-    return HttpResponse("Welcome to your admin page")
+    return render(request, 'ums/admin.html', {})
