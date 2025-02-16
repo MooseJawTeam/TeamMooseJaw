@@ -19,3 +19,8 @@ def index(request):
 #    a return HttpResponse("Hello, world. You're at the ums index.")
 
 
+def dashboard(request):
+    return HttpResponse("Welcome to your Dashboard")
+
+def admin(request):
+    return HttpResponse("Welcome to your admin page")
