@@ -20,11 +20,13 @@ sudo apt install python3
 sudo apt install python3-pip
 sudo apt install python3-django
 sudo apt-get install python3-dev default-libmysqlclient-dev build-essential
-pip3 install django
-pip3 install mysqlclient
+sudo apt install python3.10-venv
 
 
 # Start server
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirement.txt 
 export DB_USER=<USER>
 export DB_PASSWORD=<PASSWORD>
 python3 manage.py runserver
