@@ -1,1 +1,6 @@
-
+Django==5.1.6
+gunicorn==21.2.0
+mysqlclient==2.1.1 
+djangorestframework==3.14.0
+python-dotenv==1.0.0
+requests==2.31.0
