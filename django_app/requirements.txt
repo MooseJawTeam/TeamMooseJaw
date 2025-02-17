@@ -1,7 +1,0 @@
-Django==5.1.6
-gunicorn==21.2.0  # Required for deploying on Azure
-mysqlclient==2.1.1  # MySQL adapter for Django
-djangorestframework==3.14.0  # If using Django framework
-python-dotenv==1.0.0  # managing environment variables
-requests==2.31.0  # making external API requests
-whitenoise==6.6.0  # serving static files in production
