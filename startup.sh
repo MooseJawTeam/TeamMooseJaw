@@ -1,3 +1,5 @@
+set -e
+
 cd django_app
-source venv/bin/activate
+. venv/bin/activate
 python3 manage.py runserver
