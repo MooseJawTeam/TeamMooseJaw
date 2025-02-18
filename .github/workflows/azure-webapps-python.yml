@@ -46,7 +46,6 @@ jobs:
 
       - name: Create virtual environment and install dependencies
         run: |
-          cd django_app
           python -m venv venv
           source venv/bin/activate
           pwd
@@ -60,7 +59,6 @@ jobs:
           name: python-app
           path: |
             .
-            !django_app/venv/
             !venv/
 
   deploy:
