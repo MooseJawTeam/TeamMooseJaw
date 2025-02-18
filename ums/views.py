@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from .models import Users
 from django.shortcuts import render
-from django.views.decorators.csrf import requires_csrf_token
+from django.views.decorators.csrf import csrf_protect
 
 # Create your views here.
 def index(request):
@@ -27,7 +27,7 @@ def dashboard(request):
 
     return render(request, 'ums/dashboard.html', {'userID': logged_in_user})
 
-@requires_csrf_token
+@csrf_protect
 def admin(request):
     users = Users.objects.all()
     
