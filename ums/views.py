@@ -45,7 +45,7 @@ def admin(request):
                 user.save()
         elif 'delete' in request.POST:
             pk = request.POST.get('delete')
-            deleteuser = users.get(id=pk)
+            deleteuser = Users.objects.get(id=pk)
             deleteuser.delete()
         elif 'update' in request.POST:
             pk = request.POST.get('update')
