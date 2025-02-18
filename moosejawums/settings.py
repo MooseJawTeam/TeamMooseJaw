@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-es69i(7)fprqd79ygg@am*+mt7_nhj^kxrxuq-z0pk$b-s=zba
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 CSRF_TRUSTED_ORIGINS = [
-    'https://teammoosejaw-c8akbmb3dffbhjct.centralus-01.azurewebsites.net'
+    'https://teammoosejaw-c8akbmb3dffbhjct.centralus-01.azurewebsites.net','168.61.217.214'
 ]
 ALLOWED_HOSTS = ["teammoosejaw-c8akbmb3dffbhjct.centralus-01.azurewebsites.net", "168.61.217.214", "127.0.0.1"]
 
