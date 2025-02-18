@@ -6,16 +6,30 @@
 </head>
 <body>
 
-<p>Welcome, to you admin Page</p>
+<p>Welcome, to your admin Page</p>
+<form method="post" action="{% url 'admin' %}">
+    {%csrf_token%}
 
-<ul>
-   {% for user in users %}
-    <li>{{ user.name }}</li>
-    {% endfor  %}
+    <table>
+   <tr><th>Name</th><th>Email</th><th>Role</th><th>Actions</th></tr>
+   <tr>
+         <td><input type="text" name="name" value=""></td>
+         <td><input type="text" name="email" value=""></td>
+         <td><input type="text" name="role" value=""></td>
+         <td><button name = "save">Save</button></td>
+   </tr>
+    {% for user in users %}
+        <tr>
+            <td>{{user.name}}</td>
+            <td>{{user.email}}</td>
+            <td>{{user.status}}</td>
+            <td><button name = "save">Save</button></td>
+            <td><button name = "delete">Delete</button></td>
+        </tr>
+    {% endfor %}
 
-    display
-
-</ul>
+</table>
+</form>
 
 <p>{{userID.name}}</p>
 </body>
