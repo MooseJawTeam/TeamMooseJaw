@@ -27,8 +27,9 @@ def dashboard(request):
 
     return render(request, 'ums/dashboard.html', {'userID': logged_in_user})
 
-@csrf_protect
+
 def admin(request):
+    
     users = Users.objects.all()
     
     logged_in_user = get_logged_in_user()
@@ -44,7 +45,7 @@ def admin(request):
             user.save()
    
 
-    return render(request, 'ums/admin.html', {'users':users, 'userID': logged_in_user})
+    return render(request, 'ums/admin.html', {'users':users, 'userID': logged_in_user,})
 
 
 def get_logged_in_user():
