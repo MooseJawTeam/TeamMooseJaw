@@ -28,10 +28,19 @@ def dashboard(request):
 
 def admin(request):
     users = Users.objects.all()
-
+    
     logged_in_user = get_logged_in_user()
 
     print(logged_in_user)
+
+    if request.method == 'POST':
+        name = request.POST['name']
+        email = request.POST['email']
+
+        if name and email:
+            user = Users(name=name, email=email)
+            user.save()
+   
 
     return render(request, 'ums/admin.html', {'users':users, 'userID': logged_in_user})
 
