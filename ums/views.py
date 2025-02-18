@@ -37,13 +37,21 @@ def admin(request):
     print(logged_in_user)
 
     if request.method == 'POST':
-        name = request.POST['name']
-        email = request.POST['email']
+        if 'save' in request.POST:
+            name = request.POST['name']
+            email = request.POST['email']
+            if name and email:
+                user = Users(name=name, email=email)
+                user.save()
+        elif 'delete' in request.POST:
+            pk = request.POST.get('delete')
+            deleteuser = users.get(id=pk)
+            deleteuser.delete()
+        elif 'update' in request.POST:
+            pk = request.POST.get('update')
+           
 
-        if name and email:
-            user = Users(name=name, email=email)
-            user.save()
-   
+
 
     return render(request, 'ums/admin.html', {'users':users, 'userID': logged_in_user,})
 
