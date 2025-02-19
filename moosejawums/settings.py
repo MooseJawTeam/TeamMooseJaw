@@ -24,9 +24,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-es69i(7)fprqd79ygg@am*+mt7_nhj^kxrxuq-z0pk$b-s=zba'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ["teammoosejaw-c8akbmb3dffbhjct.centralus-01.azurewebsites.net", "168.61.217.214"]
+#necessary for CSRF to function properly
+CSRF_TRUSTED_ORIGINS = [
+    'https://teammoosejaw-c8akbmb3dffbhjct.centralus-01.azurewebsites.net','https://168.61.217.214'
+]
+ALLOWED_HOSTS = ["teammoosejaw-c8akbmb3dffbhjct.centralus-01.azurewebsites.net", "168.61.217.214", "127.0.0.1"]
 
 
 # Application definition
@@ -48,6 +52,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
 ]
 
 ROOT_URLCONF = 'moosejawums.urls'
@@ -63,6 +68,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.csrf',
             ],
         },
     },
