@@ -17,16 +17,23 @@
    <tr>
          <td><input type="text" name="name" value=""></td>
          <td><input type="text" name="email" value=""></td>
-         <td><input type="text" name="role" value=""></td>
+         <td><input type="text" name="status" value=""></td>
          <td><button name = "save">Save</button></td>
    </tr>
+
+</form>
+<form method="post" action="{% url 'admin' %}">
+    {% csrf_token %}
     {% for user in users %}
         <tr>
-            <td>{{user.name}}</td>
-            <td>{{user.email}}</td>
-            <td>{{user.status}}</td>
-            <td><button name = "edit" value="{{user.id}}">Edit</button></td>
+            
+            
+            <td><input type="text" name = "name" value = "{{user.name}}"></td>
+            <td><input type="text" name = "email" value = "{{user.email}}"></td>
+            <td><input type="text" name = "status" value = "{{user.status}}"></td>
+            <td><button name = "save" value="{{user.id}}"> Save Edit</button></td>
             <td><button name = "delete" value ="{{user.id}}">Delete</button></td>
+            
         </tr>
     {% endfor %}
 
