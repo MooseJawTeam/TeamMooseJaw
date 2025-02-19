@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from .models import Users
-from django.shortcuts import render
+from django.shortcuts import render,get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_protect
 
 # Create your views here.
@@ -31,29 +31,47 @@ def dashboard(request):
 def admin(request):
     
     users = Users.objects.all()
+
+
     
     logged_in_user = get_logged_in_user()
 
     print(logged_in_user)
 
     if request.method == 'POST':
-        if 'save' in request.POST:
+
+        
+
+        if 'save' in request.POST and request.POST.get('save'):
+            userid = request.POST.get('save')
+            user = Users.objects.get(id=userid)
+            print(request.POST['name'])
+            user.name = request.POST['name']
+            user.email = request.POST['email']
+            user.status = request.POST['status']
+            user.save()
+
+
+        elif 'save' in request.POST:
             name = request.POST['name']
             email = request.POST['email']
+            status = request.POST['status']
             if name and email:
-                user = Users(name=name, email=email)
+                user = Users(name=name, email=email, status=status)
                 user.save()
+
         elif 'delete' in request.POST:
             pk = request.POST.get('delete')
             deleteuser = Users.objects.get(id=pk)
             deleteuser.delete()
-        elif 'update' in request.POST:
-            pk = request.POST.get('update')
+      
+           
            
 
 
 
     return render(request, 'ums/admin.html', {'users':users, 'userID': logged_in_user,})
+
 
 
 def get_logged_in_user():
