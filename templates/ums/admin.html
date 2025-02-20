@@ -1,45 +1,203 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #bfdbfe;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    nav {
+      background-color: #1F2937;
+      color: white;
+      padding: 0.75rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+    }
+    .nav-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+    .nav-container h1 {
+      font-size: 1.25rem;
+      font-weight: bold;
+    }
+    .nav-links {
+      list-style: none;
+      display: flex;
+      gap: 1rem;
+      padding: 0;
+      margin: 0;
+    }
+    .nav-links li {
+      display: inline;
+    }
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      font-size: 1rem;
+    }
+    .content-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      align-items: center;
+    }
+    .table-container {
+      overflow-x: auto;
+      margin-top: 1rem;
+      width: 100%;
+      max-width: 1200px;
+    }
+    table {
+      width: 100%;
+      min-width: 600px;
+      border-collapse: separate;
+      border-spacing: 0;
+      background-color: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    th {
+      background-color: #1F2937;
+      color: white;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    tr:nth-child(even) {
+      background-color: #f9fafb;
+    }
+    tr:hover {
+      background-color: #F3F4F6;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #1D4ED8;
+      color: white;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      font-weight: bold;
+    }
+    button:hover {
+      background-color: #1E40AF;
+    }
+    button[name="delete"] {
+      background-color: #DC2626;
+    }
+    button[name="delete"]:hover {
+      background-color: #B91C1C;
+    }
+    @media (max-width: 768px) {
+      .table-container {
+        width: 100%;
+      }
+      table {
+        font-size: 0.875rem;
+      }
+      th, td {
+        padding: 0.75rem 0.5rem;
+      }
+      input[type="text"] {
+        padding: 0.25rem;
+      }
+      button {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+      }
+    }
+    footer {
+      background-color: #F3F4F6;
+      color: black;
+      text-align: center;
+      padding: 0.5rem 0;
+    }
+  </style>
 </head>
 <body>
-
-<p>Welcome, to your admin Page</p>
-<form method="post" action="{% url 'admin' %}">
-    {% csrf_token %} 
-
-    
-
-    <table>
-   <tr><th>Name</th><th>Email</th><th>Role</th><th>Actions</th></tr>
-   <tr>
-         <td><input type="text" name="name" value=""></td>
-         <td><input type="text" name="email" value=""></td>
-         <td><input type="text" name="status" value=""></td>
-         <td><button name = "save">Save</button></td>
-   </tr>
-
-</form>
-<form method="post" action="{% url 'admin' %}">
-    {% csrf_token %}
-    {% for user in users %}
-        <tr>
-            
-            
-            <td><input type="text" name = "name" value = "{{user.name}}"></td>
-            <td><input type="text" name = "email" value = "{{user.email}}"></td>
-            <td><input type="text" name = "status" value = "{{user.status}}"></td>
-            <td><button name = "save" value="{{user.id}}"> Save Edit</button></td>
-            <td><button name = "delete" value ="{{user.id}}">Delete</button></td>
-            
-        </tr>
-    {% endfor %}
-
-</table>
-</form>
-
-<p>{{userID.name}}</p>
+  <nav>
+    <div class="nav-container">
+      <h1>Admin Dashboard</h1>
+      <ul class="nav-links">
+        <li><a href="#">Dashboard</a></li>
+        <li><a href="#">Users</a></li>
+        <li><a href="#">Logout</a></li>
+      </ul>
+    </div>
+  </nav>
+  <div class="content-area">
+    <h2>Welcome, {{ userID.name }}</h2>
+    <div class="table-container">
+      <form method="post" action="{% url 'admin' %}">
+        {% csrf_token %}
+        <table>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Actions</th>
+          </tr>
+          <tr>
+            <td><input type="text" name="name"></td>
+            <td><input type="text" name="email"></td>
+            <td><input type="text" name="status"></td>
+            <td><button type="submit" name="save">Save</button></td>
+          </tr>
+        </table>
+      </form>
+      <form method="post" action="{% url 'admin' %}">
+        {% csrf_token %}
+        <table>
+          {% for user in users %}
+          <tr>
+            <td><input type="text" name="name" value="{{ user.name }}"></td>
+            <td><input type="text" name="email" value="{{ user.email }}"></td>
+            <td><input type="text" name="status" value="{{ user.status }}"></td>
+            <td>
+              <button type="submit" name="save" value="{{ user.id }}">Save Edit</button>
+              <button type="submit" name="delete" value="{{ user.id }}">Delete</button>
+            </td>
+          </tr>
+          {% endfor %}
+        </table>
+      </form>
+    </div>
+  </div>
+  <footer>
+    <p>&copy; 2025 Team Moose Jaw. All rights reserved.</p>
+  </footer>
 </body>
 </html>
