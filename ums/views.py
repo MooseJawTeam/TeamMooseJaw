@@ -74,9 +74,8 @@ def admin(request):
 def get_logged_in_user(request):
     email = request.headers['X-Ms-Client-Principal-Name']
     print(f"USING EMAIL: {email}")
-    email = "qux@baz.com"
     user = Users.objects.filter(email=email).first()
-    if not None:
+    if user not None:
         print("FOUND A USER!")
         return user
     else:
