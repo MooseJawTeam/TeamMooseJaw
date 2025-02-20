@@ -77,6 +77,6 @@ def get_logged_in_user(request):
     if not None:
         return user
     else:
-        user = Users(name='',email=email,status='active',role='Admin')
+        user = Users(name='foo bar',email=email,status='active')
         user.save()
         return user
