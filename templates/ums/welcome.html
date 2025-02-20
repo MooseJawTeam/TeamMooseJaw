@@ -1,0 +1,133 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MooseJaw Connect</title>
+  <style>
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #bfdbfe;
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    .card {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      max-width: 1280px;
+      background-color: #fff;
+      border-radius: 1rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    @media (min-width: 768px) {
+      .card {
+        flex-direction: row;
+      }
+    }
+    .card-image {
+      display: none;
+    }
+    @media (min-width: 768px) {
+      .card-image {
+        display: flex;
+        width: 50%;
+        align-items: center;
+        justify-content: center;
+        padding: 32px;
+        background-color: #fff;
+      }
+    }
+    .card-image img {
+      max-width: 100%;
+      height: auto;
+      object-fit: cover;
+    }
+    /* Content Section */
+    .card-content {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background-color: #fff;
+    }
+    @media (min-width: 768px) {
+      .card-content {
+        width: 50%;
+      }
+    }
+    .content-inner {
+      max-width: 24rem;
+      width: 100%;
+      text-align: center;
+    }
+    @media (min-width: 768px) {
+      .content-inner {
+        text-align: left;
+      }
+    }
+    .content-inner h2 {
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: 16px;
+    }
+    .content-inner p {
+      color: #4b5563;
+      margin-bottom: 32px;
+    }
+    /* Button Styles */
+    .btn {
+      display: inline-block;
+      width: 100%;
+      background-color: #2563eb;
+      color: #fff;
+      text-decoration: none;
+      padding: 8px 0;
+      border-radius: 0.375rem;
+      text-align: center;
+      transition: background-color 0.3s ease;
+    }
+    .btn:hover {
+      background-color: #1d4ed8; /
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <div class="card">
+
+      <div class="card-image">
+        <img src="{% static 'img/moose_jaw_logo.png' %}" alt="MooseJaw Logo">
+      </div>
+
+      <div class="card-content">
+        <div class="content-inner">
+          <h2>Welcome to MooseJaw</h2>
+          <p>Manage your users seamlessly.</p>
+          <a href="https://entra.microsoft.com/" class="btn">
+            Sign in with Microsoft Entra
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>
+
+

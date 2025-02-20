@@ -1,0 +1,130 @@
+from django.http import HttpResponse
+from .models import Users
+from django.shortcuts import render,get_object_or_404, redirect
+from django.views.decorators.csrf import csrf_protect
+
+# Create your views here.
+def index(request):
+    data = Users.objects.all()
+    data1 = data[0]
+    name1 = data1.name
+    data2 = data[1]
+    name2 = data2.name
+
+    object1 = 'here is the name of the first user in the table:'
+    object1 += '<ul>'
+    object1 += '<li>' + name1 + '</li>'
+    object1 += '<li>' + name2 + '</li>'
+    object1 += '</ul>'
+
+    return HttpResponse(object1)
+#    a return HttpResponse("Hello, world. You're at the ums index.")
+
+
+def user(request):
+
+    logged_in_user =  get_logged_in_user()
+
+    return render(request, 'ums/user.html', {'userID': logged_in_user})
+
+
+def admin(request):
+
+    users = Users.objects.all()
+
+
+
+    logged_in_user = get_logged_in_user()
+
+    print(logged_in_user)
+
+    if request.method == 'POST':
+
+
+
+        if 'save' in request.POST and request.POST.get('save'):
+            userid = request.POST.get('save')
+            user = Users.objects.get(id=userid)
+            print(request.POST['name'])
+            user.name = request.POST['name']
+            user.email = request.POST['email']
+            user.status = request.POST['status']
+            user.save()
+
+
+        elif 'save' in request.POST:
+            name = request.POST['name']
+            email = request.POST['email']
+            status = request.POST['status']
+            if name and email:
+                user = Users(name=name, email=email, status=status)
+                user.save()
+
+        elif 'delete' in request.POST:
+            pk = request.POST.get('delete')
+            deleteuser = Users.objects.get(id=pk)
+            deleteuser.delete()
+
+
+
+
+
+
+    return render(request, 'ums/admin.html', {'users':users, 'userID': logged_in_user,})
+
+
+
+def get_logged_in_user():
+    return Users.objects.get(id=1)
+
+
+
+
+
+    admin.html before changes
+
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<p>Welcome, to your admin Page</p>
+<form method="post" action="{% url 'admin' %}">
+    {% csrf_token %}
+
+
+
+    <table>
+   <tr><th>Name</th><th>Email</th><th>Role</th><th>Actions</th></tr>
+   <tr>
+         <td><input type="text" name="name" value=""></td>
+         <td><input type="text" name="email" value=""></td>
+         <td><input type="text" name="status" value=""></td>
+         <td><button name = "save">Save</button></td>
+   </tr>
+
+</form>
+<form method="post" action="{% url 'admin' %}">
+    {% csrf_token %}
+    {% for user in users %}
+        <tr>
+
+
+            <td><input type="text" name = "name" value = "{{user.name}}"></td>
+            <td><input type="text" name = "email" value = "{{user.email}}"></td>
+            <td><input type="text" name = "status" value = "{{user.status}}"></td>
+            <td><button name = "save" value="{{user.id}}"> Save Edit</button></td>
+            <td><button name = "delete" value ="{{user.id}}">Delete</button></td>
+
+        </tr>
+    {% endfor %}
+
+</table>
+</form>
+
+<p>{{userID.name}}</p>
+</body>
+</html>
