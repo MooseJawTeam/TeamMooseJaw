@@ -10,6 +10,9 @@ def index(request):
 
 
 def user(request):
+    print('Headers')
+    for key, value in request.headers.items():
+        print(f"{key}:{value}")
 
     logged_in_user =  get_logged_in_user()
 
