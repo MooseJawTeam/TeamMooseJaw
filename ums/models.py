@@ -9,11 +9,11 @@ from django.db import models
 
 
 class Users(models.Model):
-    id = models.CharField(primary_key=True, max_length=36)
+    id = models.CharField(primary_key=True, max_length=100)
     name = models.CharField(max_length=100)
     email = models.EmailField(unique=True, max_length=100)
     status = models.CharField(max_length=100)
-    role = models.CharField(max_length=50, default='Basicuser')
+    role = models.CharField(max_length=100, default='Basicuser')
   
 
     class Meta:

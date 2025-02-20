@@ -68,7 +68,7 @@ def admin(request):
 # 2025-02-20T17:57:24.227208424Z: [INFO]  X-Ms-Client-Principal-Id:41216345-d292-45aa-866b-dac98917256f
 def get_logged_in_user(request):
     id = request.headers['X-Ms-Client-Principal-Id']
-    email = request.headers.get('X-Ms-Client-Principal-Name')
+    email = request.headers['X-Ms-Client-Principal-Name']
     print(f"USING id: {id}")
     user = Users.objects.filter(id=id).first()
     if user is not None:
@@ -76,7 +76,7 @@ def get_logged_in_user(request):
         return user
     else:
         print("DID NOT FIND A USER")
-        user = Users(name='',email='email',id='id', status='active',role='Admin')
+        user = Users(name='',email=email,id=id, status='active',role='Admin')
         user.save()
         print(f"SAVED NEW USER: {user.id}")
         return user
