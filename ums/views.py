@@ -59,11 +59,6 @@ def admin(request):
             pk = request.POST.get('delete')
             deleteuser = Users.objects.get(id=pk)
             deleteuser.delete()
-      
-           
-           
-
-
 
     return render(request, 'ums/admin.html', {'users':users, 'userID': logged_in_user,})
 
@@ -72,15 +67,16 @@ def admin(request):
 # 2025-02-20T17:57:24.227204272Z: [INFO]  X-Ms-Client-Principal-Name:congouya@CougarNet.UH.EDU
 # 2025-02-20T17:57:24.227208424Z: [INFO]  X-Ms-Client-Principal-Id:41216345-d292-45aa-866b-dac98917256f
 def get_logged_in_user(request):
-    email = request.headers['X-Ms-Client-Principal-Name']
-    print(f"USING EMAIL: {email}")
-    user = Users.objects.filter(email=email).first()
+    id = request.headers['X-Ms-Client-Principal-Id']
+    email = request.headers.get('X-Ms-Client-Principal-Name')
+    print(f"USING id: {id}")
+    user = Users.objects.filter(id=id).first()
     if user is not None:
         print("FOUND A USER!")
         return user
     else:
         print("DID NOT FIND A USER")
-        user = Users(name='foo bar',email=email,status='active')
+        user = Users(name='',email='email',id='id', status='active',role='Admin')
         user.save()
         print(f"SAVED NEW USER: {user.id}")
         return user
