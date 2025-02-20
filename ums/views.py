@@ -73,7 +73,7 @@ def admin(request):
 # 2025-02-20T17:57:24.227208424Z: [INFO]  X-Ms-Client-Principal-Id:41216345-d292-45aa-866b-dac98917256f
 def get_logged_in_user(request):
     email = request.headers['X-Ms-Client-Principal-Name']
-    user = Users.objects.get(email=email)
+    user = Users.objects.filter(email=email).first()
     if not None:
         return user
     else:
