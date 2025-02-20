@@ -55,3 +55,7 @@ mysql> select * from users;
 # Exit
 mysql> exit
 ```
+
+## Ressources
+- https://portal.azure.com/#@UofH.UH.EDU/asset/WebsitesExtension/Website/subscriptions/01886e22-9e9c-4375-9a73-0e2188e5aa2d/resourceGroups/TeamMooseJaw_group/providers/Microsoft.Web/sites/TeamMooseJaw
+- https://teammoosejaw-c8akbmb3dffbhjct.centralus-01.azurewebsites.net
