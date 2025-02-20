@@ -73,10 +73,15 @@ def admin(request):
 # 2025-02-20T17:57:24.227208424Z: [INFO]  X-Ms-Client-Principal-Id:41216345-d292-45aa-866b-dac98917256f
 def get_logged_in_user(request):
     email = request.headers['X-Ms-Client-Principal-Name']
+    print(f"USING EMAIL: {email}")
+    email = "qux@baz.com"
     user = Users.objects.filter(email=email).first()
     if not None:
+        print("FOUND A USER!")
         return user
     else:
+        print("DID NOT FIND A USER")
         user = Users(name='foo bar',email=email,status='active')
         user.save()
+        print(f"SAVED NEW USER: {user.id}")
         return user
