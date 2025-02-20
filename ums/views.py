@@ -8,13 +8,16 @@ def index(request):
     return render(request, 'ums/welcome.html', {})
 #    a return HttpResponse("Hello, world. You're at the ums index.")
 
+# 2025-02-20T17:57:24.227204272Z: [INFO]  X-Ms-Client-Principal-Name:congouya@CougarNet.UH.EDU
+# 2025-02-20T17:57:24.227208424Z: [INFO]  X-Ms-Client-Principal-Id:41216345-d292-45aa-866b-dac98917256f
+
 
 def user(request):
     print('Headers')
     for key, value in request.headers.items():
         print(f"{key}:{value}")
 
-    logged_in_user =  get_logged_in_user()
+    logged_in_user =  get_logged_in_user(request)
 
     return render(request, 'ums/user.html', {'userID': logged_in_user})
 
@@ -28,13 +31,11 @@ def admin(request):
 
 
     
-    logged_in_user = get_logged_in_user()
+    logged_in_user = get_logged_in_user(request)
 
     print(logged_in_user)
 
     if request.method == 'POST':
-
-        
 
         if 'save' in request.POST and request.POST.get('save'):
             userid = request.POST.get('save')
@@ -66,7 +67,15 @@ def admin(request):
 
     return render(request, 'ums/admin.html', {'users':users, 'userID': logged_in_user,})
 
+# post = Post.objects.create(title="Test", body="abc")
 
-
-def get_logged_in_user():
-    return Users.objects.get(id=1)
+# 2025-02-20T17:57:24.227204272Z: [INFO]  X-Ms-Client-Principal-Name:congouya@CougarNet.UH.EDU
+# 2025-02-20T17:57:24.227208424Z: [INFO]  X-Ms-Client-Principal-Id:41216345-d292-45aa-866b-dac98917256f
+def get_logged_in_user(request):
+    email = request.headers['X-Ms-Client-Principal-Name']
+    user = Users.objects.get(email=email)
+    if not None:
+        return user
+    else:
+        user = Users.objects.create(name='',email=email,status='active',role='Admin')
+        return user
