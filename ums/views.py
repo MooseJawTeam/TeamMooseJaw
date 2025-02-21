@@ -35,7 +35,6 @@ def admin(request):
     print(logged_in_user)
 
     if request.method == 'POST':
-
         if 'save' in request.POST and request.POST.get('save'):
             userid = request.POST.get('save')
             user = Users.objects.get(id=userid)
@@ -44,7 +43,6 @@ def admin(request):
             user.email = request.POST['email']
             user.status = request.POST['status']
             user.save()
-
 
         elif 'save' in request.POST:
             name = request.POST['name']
@@ -69,8 +67,9 @@ def get_logged_in_user(request):
     id = request.headers['X-Ms-Client-Principal-Id']
     email = request.headers['X-Ms-Client-Principal-Name']
     print(f"USING id: {id}")
+    
     user = Users.objects.filter(id=id).first()
-    if user is not None:
+    if user:
         print("FOUND A USER!")
         return user
     else:
