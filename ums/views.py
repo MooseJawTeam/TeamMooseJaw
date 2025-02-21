@@ -28,10 +28,11 @@ def admin(request):
 #     # send this to a MSFT API with requests
     
     users = Users.objects.all()
-
-
     
     logged_in_user = get_logged_in_user(request)
+
+#     if logged_in_user.role !=git  'Admin':
+#         return HttpResponse('Unauthorized', status=401)
 
     print(logged_in_user)
 
