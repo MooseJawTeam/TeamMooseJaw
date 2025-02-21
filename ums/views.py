@@ -18,7 +18,6 @@ def user(request):
         print(f"{key}:{value}")
 
     logged_in_user =  get_logged_in_user(request)
-
     return render(request, 'ums/user.html', {'userID': logged_in_user})
 
 
@@ -28,7 +27,6 @@ def admin(request):
 #     # send this to a MSFT API with requests
     
     users = Users.objects.all()
-    
     logged_in_user = get_logged_in_user(request)
 
 #     if logged_in_user.role !=git  'Admin':
