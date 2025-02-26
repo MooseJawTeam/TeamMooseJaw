@@ -22,7 +22,6 @@ from django.conf.urls.static import static
 
 
 urlpatterns = [
-    path("ums/", include("ums.urls")),
-    path('', RedirectView.as_view(url='/ums/', permanent=True)),
-
+    path("", include("ums.urls")),
+    path("admin/", admin.site.urls),
 ]

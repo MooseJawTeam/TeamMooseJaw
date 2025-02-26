@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+import environ
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,13 +26,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-es69i(7)fprqd79ygg@am*+mt7_nhj^kxrxuq-z0pk$b-s=zba'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 #necessary for CSRF to function properly
 CSRF_TRUSTED_ORIGINS = [
-    'https://teammoosejaw-c8akbmb3dffbhjct.centralus-01.azurewebsites.net','https://168.61.217.214'
+    #'https://teammoosejaw-c8akbmb3dffbhjct.centralus-01.azurewebsites.net','https://168.61.217.214'
+     "http://127.0.0.1",
+    "http://localhost"
+
 ]
-ALLOWED_HOSTS = ["teammoosejaw-c8akbmb3dffbhjct.centralus-01.azurewebsites.net", "168.61.217.214", "127.0.0.1"]
+# ALLOWED_HOSTS = ["teammoosejaw-c8akbmb3dffbhjct.centralus-01.azurewebsites.net", "168.61.217.214", "127.0.0.1"]
+ALLOWED_HOSTS = ["127.0.0.1","localhost"]
 
 
 # Application definition
@@ -110,6 +116,20 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+
+# Microsoft Auth API Settings
+env = environ.Env()
+environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
+
+MICROSOFT_AUTH = {
+    'TENANT_ID': env('TENANT_ID', default="common"),
+    'CLIENT_ID': env('CLIENT_ID'),
+    'CLIENT_SECRET': env('CLIENT_SECRET'),
+    'REDIRECT_URI': "http://localhost:8000/auth/callback/",
+    'AUTHORITY': "https://login.microsoftonline.com/common",
+    'SCOPES': ["User.Read", "User.ReadBasic.All"]
+}
 
 
 # Internationalization
