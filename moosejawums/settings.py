@@ -12,9 +12,12 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+<<<<<<< HEAD
 import environ
 from django.contrib.messages import constants as messages
 
+=======
+>>>>>>> ed3138ec107aa2896907dd9325c20890e674d891
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -31,6 +34,7 @@ DEBUG = True
 
 #necessary for CSRF to function properly
 CSRF_TRUSTED_ORIGINS = [
+<<<<<<< HEAD
     #'https://teammoosejaw-c8akbmb3dffbhjct.centralus-01.azurewebsites.net','https://168.61.217.214'
      "http://127.0.0.1",
     "http://localhost"
@@ -38,6 +42,11 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 # ALLOWED_HOSTS = ["teammoosejaw-c8akbmb3dffbhjct.centralus-01.azurewebsites.net", "168.61.217.214", "127.0.0.1"]
 ALLOWED_HOSTS = ["127.0.0.1","localhost"]
+=======
+    'https://teammoosejaw-c8akbmb3dffbhjct.centralus-01.azurewebsites.net','https://168.61.217.214'
+]
+ALLOWED_HOSTS = ["teammoosejaw-c8akbmb3dffbhjct.centralus-01.azurewebsites.net", "168.61.217.214", "127.0.0.1"]
+>>>>>>> ed3138ec107aa2896907dd9325c20890e674d891
 
 
 # Application definition
@@ -49,7 +58,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+<<<<<<< HEAD
     'ums'
+=======
+>>>>>>> ed3138ec107aa2896907dd9325c20890e674d891
 ]
 
 MIDDLEWARE = [
@@ -120,6 +132,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+<<<<<<< HEAD
 # Microsoft Auth API Settings
 env = environ.Env()
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
@@ -134,6 +147,8 @@ MICROSOFT_AUTH = {
 }
 
 
+=======
+>>>>>>> ed3138ec107aa2896907dd9325c20890e674d891
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
@@ -158,6 +173,7 @@ STATICFILES_DIRS = [BASE_DIR /'static']
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+<<<<<<< HEAD
 MESSAGE_STORAGE = "django.contrib.messages.storage.session.SessionStorage"
 
 MESSAGE_TAGS = {
@@ -166,4 +182,6 @@ MESSAGE_TAGS = {
     messages.INFO: "info",
     messages.WARNING: "warning",
 }
+=======
+>>>>>>> ed3138ec107aa2896907dd9325c20890e674d891
 

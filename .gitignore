@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 django_app/venv
 venv.env
 .env
 .env
+=======
+django_app/venv
+venv
+>>>>>>> ed3138ec107aa2896907dd9325c20890e674d891
