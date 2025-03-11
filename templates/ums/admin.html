@@ -154,35 +154,23 @@
       <ul class="nav-links">
         <li><a href="#">Dashboard</a></li>
         <li><a href="#">Users</a></li>
-<<<<<<< HEAD
         <li><a href="{% url 'logout' %}">Logout</a></li>
-=======
-        <li><a href="#">Logout</a></li>
->>>>>>> ed3138ec107aa2896907dd9325c20890e674d891
       </ul>
     </div>
   </nav>
   <div class="content-area">
-<<<<<<< HEAD
-
+    <h2>Welcome, {{ admin_user.name }}</h2>
 
     <!-- Add New User Form -->
     <div class="add-user-container">
-      <h2>Welcome, {{ admin_user.name }}</h2>
       <h3>Add New User</h3>
       <form method="post" action="{% url 'admin_dashboard' %}">
-=======
-    <h2>Welcome, {{ userID.name }}</h2>
-    <div class="table-container">
-      <form method="post" action="{% url 'admin' %}">
->>>>>>> ed3138ec107aa2896907dd9325c20890e674d891
         {% csrf_token %}
         <table>
           <tr>
             <th>Name</th>
             <th>Email</th>
             <th>Role</th>
-<<<<<<< HEAD
             <th>Status</th>
             <th>Actions</th>
           </tr>
@@ -213,15 +201,15 @@
       <form method="post" action="{% url 'admin_dashboard' %}">
         {% csrf_token %}
         <table>
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-          {% for user in users %}
-          <tr>
+    <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Status</th>
+        <th>Actions</th>
+    </tr>
+    {% for user in users %}
+    <tr>
         <td><input type="text" name="name" value="{{ user.name }}"></td>
         <td><input type="text" name="email" value="{{ user.email }}"></td>
         <td>
@@ -246,41 +234,14 @@
             {% endif %}
         </td>
     </tr>
-=======
-            <th>Actions</th>
-          </tr>
-          <tr>
-            <td><input type="text" name="name"></td>
-            <td><input type="text" name="email"></td>
-            <td><input type="text" name="status"></td>
-            <td><button type="submit" name="save">Save</button></td>
-          </tr>
-        </table>
-      </form>
-      <form method="post" action="{% url 'admin' %}">
-        {% csrf_token %}
-        <table>
-          {% for user in users %}
-          <tr>
-            <td><input type="text" name="name" value="{{ user.name }}"></td>
-            <td><input type="text" name="email" value="{{ user.email }}"></td>
-            <td><input type="text" name="status" value="{{ user.status }}"></td>
-            <td>
-              <button type="submit" name="save" value="{{ user.id }}">Save Edit</button>
-              <button type="submit" name="delete" value="{{ user.id }}">Delete</button>
-            </td>
-          </tr>
->>>>>>> ed3138ec107aa2896907dd9325c20890e674d891
-          {% endfor %}
-        </table>
+    {% endfor %}
+</table>
       </form>
     </div>
   </div>
-<<<<<<< HEAD
-=======
   <footer>
     <p>&copy; 2025 Team Moose Jaw. All rights reserved.</p>
   </footer>
 </body>
 </html>
->>>>>>> ed3138ec107aa2896907dd9325c20890e674d891
+
