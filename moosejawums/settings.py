@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 import os
 import environ
+from django.contrib.messages import constants as messages
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -26,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-es69i(7)fprqd79ygg@am*+mt7_nhj^kxrxuq-z0pk$b-s=zba'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 #necessary for CSRF to function properly
 CSRF_TRUSTED_ORIGINS = [
@@ -48,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'ums'
 ]
 
 MIDDLEWARE = [
@@ -128,7 +130,7 @@ MICROSOFT_AUTH = {
     'CLIENT_SECRET': env('CLIENT_SECRET'),
     'REDIRECT_URI': "http://localhost:8000/auth/callback/",
     'AUTHORITY': "https://login.microsoftonline.com/common",
-    'SCOPES': ["User.Read", "User.ReadBasic.All"]
+    'SCOPE': ["User.Read"]
 }
 
 
@@ -156,4 +158,12 @@ STATICFILES_DIRS = [BASE_DIR /'static']
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+MESSAGE_STORAGE = "django.contrib.messages.storage.session.SessionStorage"
+
+MESSAGE_TAGS = {
+    messages.ERROR: "danger",
+    messages.SUCCESS: "success",
+    messages.INFO: "info",
+    messages.WARNING: "warning",
+}
 

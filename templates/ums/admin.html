@@ -154,50 +154,89 @@
       <ul class="nav-links">
         <li><a href="#">Dashboard</a></li>
         <li><a href="#">Users</a></li>
-        <li><a href="#">Logout</a></li>
+        <li><a href="{% url 'logout' %}">Logout</a></li>
       </ul>
     </div>
   </nav>
   <div class="content-area">
-    <h2>Welcome, {{ userID.name }}</h2>
-    <div class="table-container">
-      <form method="post" action="{% url 'admin' %}">
+
+
+    <!-- Add New User Form -->
+    <div class="add-user-container">
+      <h2>Welcome, {{ admin_user.name }}</h2>
+      <h3>Add New User</h3>
+      <form method="post" action="{% url 'admin_dashboard' %}">
         {% csrf_token %}
         <table>
           <tr>
             <th>Name</th>
             <th>Email</th>
             <th>Role</th>
+            <th>Status</th>
             <th>Actions</th>
           </tr>
           <tr>
-            <td><input type="text" name="name"></td>
-            <td><input type="text" name="email"></td>
-            <td><input type="text" name="status"></td>
-            <td><button type="submit" name="save">Save</button></td>
+            <td><input type="text" name="name" required></td>
+            <td><input type="email" name="email" required></td>
+            <td>
+              <select name="role">
+                <option value="Basicuser">Basic User</option>
+                <option value="Admin">Admin</option>
+              </select>
+            </td>
+            <td>
+              <select name="status">
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </td>
+            <td><button type="submit" name="add_user">Add User</button></td>
           </tr>
         </table>
       </form>
-      <form method="post" action="{% url 'admin' %}">
+    </div>
+
+    <!-- User List Table -->
+    <div class="table-container">
+      <h3>Manage Users</h3>
+      <form method="post" action="{% url 'admin_dashboard' %}">
         {% csrf_token %}
         <table>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
           {% for user in users %}
           <tr>
-            <td><input type="text" name="name" value="{{ user.name }}"></td>
-            <td><input type="text" name="email" value="{{ user.email }}"></td>
-            <td><input type="text" name="status" value="{{ user.status }}"></td>
-            <td>
-              <button type="submit" name="save" value="{{ user.id }}">Save Edit</button>
-              <button type="submit" name="delete" value="{{ user.id }}">Delete</button>
-            </td>
-          </tr>
+        <td><input type="text" name="name" value="{{ user.name }}"></td>
+        <td><input type="text" name="email" value="{{ user.email }}"></td>
+        <td>
+            <select name="role">
+                <option value="Basicuser" {% if user.role == "Basicuser" %}selected{% endif %}>Basic User</option>
+                <option value="Admin" {% if user.role == "Admin" %}selected{% endif %}>Admin</option>
+            </select>
+        </td>
+        <td>
+            <select name="status">
+                <option value="Active" {% if user.status == "Active" %}selected{% endif %}>Active</option>
+                <option value="Inactive" {% if user.status == "Inactive" %}selected{% endif %}>Inactive</option>
+            </select>
+        </td>
+        <td>
+            <button type="submit" name="save" value="{{ user.id }}">Save Edit</button>
+            <button type="submit" name="delete" value="{{ user.id }}" class="delete-btn">Delete</button>
+            {% if user.status == "Active" %}
+                <button type="submit" name="deactivate" value="{{ user.id }}" class="deactivate-btn">Deactivate</button>
+            {% else %}
+                <button type="submit" name="activate" value="{{ user.id }}" class="activate-btn">Reactivate</button>
+            {% endif %}
+        </td>
+    </tr>
           {% endfor %}
         </table>
       </form>
     </div>
   </div>
-  <footer>
-    <p>&copy; 2025 Team Moose Jaw. All rights reserved.</p>
-  </footer>
-</body>
-</html>

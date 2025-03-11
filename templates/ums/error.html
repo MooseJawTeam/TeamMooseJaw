@@ -1,0 +1,76 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Access Denied</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #bfdbfe;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+    }
+    main {
+      flex: 1 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 50px;
+    }
+    .container {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      max-width: 500px;
+      width: 100%;
+    }
+    h1 {
+      color: #721c24;
+    }
+    p {
+      color: #721c24;
+    }
+    .back-link {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 15px;
+      background-color: #f5c6cb;
+      color: #721c24;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    .back-link:hover {
+      background-color: #f1b0b7;
+    }
+    footer {
+      background-color: #F3F4F6;
+      color: black;
+      text-align: center;
+      padding: 1rem 0;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="container">
+      <h1>Access Denied</h1>
+      <p>Your account has been deactivated. Please contact the administrator for assistance.</p>
+      <a href="/" class="back-link">Go to Home</a>
+    </div>
+  </main>
+  <footer>
+    © 2025 Team Moose Jaw. All rights reserved.
+  </footer>
+</body>
+</html>

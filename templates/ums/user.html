@@ -109,21 +109,22 @@
       <ul class="nav-links">
         <li>Dashboard</li>
         <li>Users</li>
-        <li>Logout</li>
+        <li><a href="{% url 'logout' %}">Logout</a></li>
       </ul>
     </div>
   </nav>
 
   <div class="main-container">
     <div class="main-content">
-      <h2>Hello, Welcome to your Dashboard {{userID.name}}</h2>
+      <h2>Hello, Welcome to your Dashboard {{user.name}}</h2>
       <div class="card-grid">
 
         <div class="card">
-          <h3>Card One</h3>
-          <p>A Moose Jaw Connect User</p>
+          <h3>Your Info:</h3>
+          <p>Role: {{user.role}}</p>
+          <p>Email: {{user.email }}</p>
+          <p>ID: {{user.id }}</p>
         </div>
-        <!--cards here -->
       </div>
     </div>
   </div>
