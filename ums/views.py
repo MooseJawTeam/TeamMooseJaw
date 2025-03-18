@@ -16,7 +16,7 @@ def index(request):
 
 def user(request):
     if "user_id" not in request.session:
-        return redirect("login")
+        return redirect("ums-login")
     user_data = {
         "name": request.session.get("user_name", "Unknown"),
         "email": request.session.get("user_email", "No Email"),
@@ -24,12 +24,12 @@ def user(request):
         "role":request.session.get("user_role", "Basicuser")
     }
 
-    return render(request, "ums/user.html", {"user": user_data, 'admin_user':admin_user})
+    return render(request, "ums/user.html", {"user": user_data})
 
 @role_required(["Admin"])
 def admin_dashboard(request):
     if request.session.get("user_role") != "Admin":
-        return redirect("home")  # Redirect non-admins
+        return redirect("welcome")  # Redirect non-admins
 
     users = Users.objects.all()
 
@@ -103,7 +103,7 @@ def callback(request):
     code = request.GET.get("code")
     if not code:
         messages.error(request, "Invalid authentication request.")
-        return redirect("login")
+        return redirect("ums-login")
 
     msal_app = msal.ConfidentialClientApplication(
         settings.MICROSOFT_AUTH["CLIENT_ID"],
@@ -119,7 +119,7 @@ def callback(request):
 
         if "access_token" not in token_response:
             messages.error(request, "Authentication failed. Please try again.")
-            return redirect("login")
+            return redirect("ums-login")
 
         # Fetch user details from Microsoft Graph API
         headers = {"Authorization": f'Bearer {token_response["access_token"]}'}
@@ -130,7 +130,7 @@ def callback(request):
 
         if not user_id or not user_email:
             messages.error(request, "Your Microsoft account is missing an email. Contact support.")
-            return redirect("login")
+            return redirect("ums-login")
 
         # Find or create a user in the database
         user, created = Users.objects.get_or_create(
@@ -164,7 +164,7 @@ def callback(request):
 
     except Exception as e:
         messages.error(request, f"Error in authentication: {str(e)}")
-        return redirect("login")
+        return redirect("ums-login")
 
 def logout(request):
     request.session.flush() # clear session
