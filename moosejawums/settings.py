@@ -12,8 +12,10 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
-import environ
 from django.contrib.messages import constants as messages
+
+# Add django-environ
+import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -48,7 +50,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'ums'
+    'ums',
+    'pdfdocs'
 ]
 
 MIDDLEWARE = [
@@ -89,15 +92,22 @@ WSGI_APPLICATION = 'moosejawums.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'mjapp',
-        'HOST': 'moosejawdb.mysql.database.azure.com',
-        'PORT': '3306',
-        'PASSWORD': os.environ.get('DB_PASSWORD'),
-        'USER': os.environ.get('DB_USER'),
-
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'db.sqlite3',
     }
 }
+
+# Original MySQL configuration
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'mjapp',
+#         'HOST': 'moosejawdb.mysql.database.azure.com',
+#         'PORT': '3306', 
+#         'PASSWORD': os.environ.get('DB_PASSWORD'),
+#         'USER': os.environ.get('DB_USER'),
+#     }
+# }
 
 
 # Password validation
@@ -148,6 +158,10 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR /'static']
+
+# Media files (Uploads, Generated PDFs)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 # Default primary key field type

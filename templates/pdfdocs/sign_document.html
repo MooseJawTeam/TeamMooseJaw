@@ -1,0 +1,85 @@
+{% extends 'ums/welcome.html' %}
+
+{% block content %}
+<div class="container pt-5">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Sign Document: {{ document.title }}</h5>
+                    <a href="{% url 'view_document' document.id %}" class="btn btn-secondary btn-sm">Back to Document</a>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Document Preview</h5>
+                            <div class="embed-responsive" style="height: 400px;">
+                                <iframe class="embed-responsive-item w-100 h-100" src="{{ MEDIA_URL }}{{ document.file_path }}"></iframe>
+                            </div>
+                            <div class="mt-3">
+                                <p><strong>Created by:</strong> {{ document.created_by.name }}</p>
+                                <p><strong>Created on:</strong> {{ document.created_at|date:"F d, Y" }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Sign Below</h5>
+                            <p>By signing this document, you confirm that you have read and agree to its contents. Your signature will be permanently recorded.</p>
+                            
+                            <form id="signature-form" method="post">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label class="form-label">Your Name: {{ user.name }}</label>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Your Email: {{ user.email }}</label>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Signature</label>
+                                    <div id="signature-pad" class="border rounded p-3" style="height: 200px; background-color: #f8f9fa;">
+                                        <canvas id="signature-canvas" width="450" height="180"></canvas>
+                                    </div>
+                                    <div class="mt-2">
+                                        <button type="button" id="clear-signature" class="btn btn-sm btn-secondary">Clear Signature</button>
+                                    </div>
+                                    <input type="hidden" id="signature-data" name="signature_data">
+                                </div>
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="confirm-signature" required>
+                                    <label class="form-check-label" for="confirm-signature">I confirm this is my signature and I am signing this document</label>
+                                </div>
+                                <button type="submit" class="btn btn-primary" id="submit-signature">Sign Document</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const canvas = document.getElementById('signature-canvas');
+        const signaturePad = new SignaturePad(canvas, {
+            backgroundColor: 'rgba(255, 255, 255, 0)',
+            penColor: 'black'
+        });
+        
+        document.getElementById('clear-signature').addEventListener('click', function() {
+            signaturePad.clear();
+        });
+        
+        document.getElementById('signature-form').addEventListener('submit', function(e) {
+            if (signaturePad.isEmpty()) {
+                e.preventDefault();
+                alert('Please provide a signature');
+                return false;
+            }
+            
+            const signatureData = signaturePad.toDataURL();
+            document.getElementById('signature-data').value = signatureData;
+        });
+    });
+</script>
+{% endblock %}

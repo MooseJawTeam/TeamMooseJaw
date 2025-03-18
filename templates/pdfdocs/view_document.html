@@ -1,0 +1,91 @@
+{% extends 'ums/welcome.html' %}
+
+{% block content %}
+<div class="container pt-5">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ document.title }}</h5>
+                    <a href="{% url 'document_list' %}" class="btn btn-secondary btn-sm">Back to Documents</a>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p><strong>Created by:</strong> {{ document.created_by.name }}</p>
+                            <p><strong>Created on:</strong> {{ document.created_at|date:"F d, Y" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Template:</strong> {{ document.template.name }}</p>
+                            <p><strong>Signatures:</strong> {{ document.signed_by.count }}</p>
+                        </div>
+                    </div>
+
+                    <div class="embed-responsive" style="height: 500px;">
+                        <iframe class="embed-responsive-item w-100 h-100" src="{{ MEDIA_URL }}{{ document.file_path }}"></iframe>
+                    </div>
+
+                    <div class="mt-3 d-flex justify-content-between">
+                        <a href="{% url 'download_document' document.id %}" class="btn btn-primary">Download PDF</a>
+                        {% if not already_signed %}
+                        <a href="{% url 'sign_document' document.id %}" class="btn btn-success">Sign Document</a>
+                        {% else %}
+                        <button class="btn btn-success" disabled>Already Signed</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Signatures</h5>
+                </div>
+                <div class="card-body">
+                    {% if signatures %}
+                    <ul class="list-group">
+                        {% for signature in signatures %}
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ signature.user.name }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ signature.timestamp|date:"M d, Y h:i A" }}</small>
+                                </div>
+                                <span class="badge {% if signature.is_valid %}bg-success{% else %}bg-danger{% endif %} rounded-pill">
+                                    {% if signature.is_valid %}Valid{% else %}Invalid{% endif %}
+                                </span>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <div class="alert alert-info">
+                        No signatures yet. Be the first to sign this document!
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0">Document Information</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Document ID:</strong> {{ document.id }}</p>
+                    <p><strong>Last updated:</strong> {{ document.updated_at|date:"F d, Y h:i A" }}</p>
+                    <p>
+                        <strong>Status:</strong>
+                        {% if document.signed_by.count > 0 %}
+                        <span class="badge bg-success">Signed</span>
+                        {% else %}
+                        <span class="badge bg-warning">Pending Signatures</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
