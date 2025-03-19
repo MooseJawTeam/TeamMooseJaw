@@ -44,3 +44,16 @@ class DocumentSignature(models.Model):
     
     def __str__(self):
         return f"{self.document.title} signed by {self.user.name} at {self.timestamp}"
+
+ class DocumentApproval(models.Model):
+     """The Approval Process"""
+     document = models.ForeignKey(GeneratedDocument, on_delete=models.CASCADE)
+     approve = models.ForeignKey(User, on_delete=models.CASCADE)
+     action = models.CharField(max_length=60, choices=[("Pending", "Pending"), ("Approved", "Approved"),("Denied", "Denied")], default = "Pending")
+     comments = models.TextField(blank = True, null = True)
+     time_approved = models.DateTimeField(auto_now =True)
+
+    def __str__(self):
+        return f"Approval {self.status} by {self.approve.username} for {self.document.name}"
+     
+     
