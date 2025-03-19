@@ -96,8 +96,6 @@ def microsoft_login(request):
 
     return redirect(login_url)
 
-from django.contrib import messages
-
 def callback(request):
     #retrieve authorization code provided by microsoft
     code = request.GET.get("code")
