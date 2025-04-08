@@ -27,11 +27,17 @@ class GeneratedDocument(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    expires_at = models.DateTimeField(blank = True, null = True)
+    revision = models.IntegerField(default = 1)
+
     def __str__(self):
         return self.title
 
     def get_absolute_file_path(self):
         return os.path.join(settings.MEDIA_ROOT, self.file_path)
+
+    def is_expired(self):
+        return self.expires_at and timezone.now() > self.expires_at
 
 
 class DocumentSignature(models.Model):
