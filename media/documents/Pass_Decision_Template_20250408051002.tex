@@ -1,0 +1,83 @@
+\documentclass[12pt]{article}
+\usepackage[a4paper, margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{xcolor}
+\usepackage{qrcode}
+\usepackage{hyperref}
+
+% Define colors
+\definecolor{moosejawblue}{RGB}{0, 102, 204}
+
+% Placeholders
+\newcommand{\documentid}{document_id_placeholder}
+\newcommand{RCEForm Decision}{document_title_placeholder}
+\newcommand{christa rebecca ongouya}{user_name_placeholder}
+\newcommand{rc.ongouya242@gmail.com}{user_email_placeholder}
+\newcommand{\generationdate}{generation_date_placeholder}
+\newcommand{I want to able to take the exam}{custom_text_placeholder}
+\newcommand{Ongouya, Christa Rebecca}{admin_name_placeholder}
+\newcommand{Administrator}{admin_position_placeholder}
+
+\begin{document}
+
+% Header section
+\begin{center}
+    \includegraphics[width=3cm]{/home/pavdog/TeamMooseJaw/static/img/moose_jaw_logo.png}
+    \vspace{1cm}
+
+    {\Large\textbf{RCEForm Decision}}
+    \vspace{0.5cm}
+
+    {\large\textbf{Official Approval Document}}
+    \vspace{1cm}
+\end{center}
+
+% QR Code
+\begin{tikzpicture}[overlay, remember picture]
+    \node[anchor=north east, xshift=-1cm, yshift=-1cm] at (current page.north east) {
+        \qrcode[height=2cm]{Document ID: \documentid, Generated: \generationdate}
+    };
+\end{tikzpicture}
+
+% Metadata
+\noindent\rule{\linewidth}{1pt}
+\vspace{0.5cm}
+
+\noindent\textbf{Document ID:} \documentid \\
+\noindent\textbf{Generated:} \generationdate \\
+\noindent\textbf{Created By:} christa rebecca ongouya \\
+\noindent\textbf{Email:} rc.ongouya242@gmail.com
+
+\vspace{1cm}
+
+% Approval Text
+\noindent\textbf{Decision:} \textbf{APPROVED}
+
+\vspace{0.5cm}
+
+\noindent Your request for \textbf{RCEForm Decision} has been reviewed and \textbf{approved}. You may proceed as instructed in the university guidelines.
+
+\vspace{1cm}
+
+\noindent\textbf{Administrator's Remarks:} \\
+\parbox{0.9\textwidth}{
+I want to able to take the exam
+}
+
+\vspace{2cm}
+
+% Signature
+\noindent\rule{7cm}{0.5pt} \\
+\noindent\textbf{Administrator Signature} \\
+\noindent\textbf{Name:} Ongouya, Christa Rebecca \\
+\noindent\textbf{Position:} Administrator
+
+\vspace{1cm}
+
+\begin{center}
+    {\color{moosejawblue}\textit{This document was generated and digitally signed by the Team Moose Jaw UMS system.}}\\
+    {\small\textit{Digital verification available at https://teammoosejaw.com/verify/\documentid}}
+\end{center}
+
+\end{document}

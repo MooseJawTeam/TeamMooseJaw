@@ -4,4 +4,8 @@ django-environ==0.10.0
 pillow==10.0.0
 pypdf2==3.0.1
 reportlab==4.0.4
+msal==1.25.0
+requests==2.31.0
+weasyprint==60.2
+gunicorn==21.2.0
 

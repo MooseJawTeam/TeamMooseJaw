@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Denial Document</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 2cm;
+        }
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #cc0000;
+            margin-bottom: 1cm;
+        }
+        .subtitle {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 0.5cm;
+        }
+        .metadata {
+            border-top: 2px solid #cc0000;
+            padding-top: 1cm;
+            margin-bottom: 1cm;
+        }
+        .metadata-item {
+            margin-bottom: 0.5cm;
+        }
+        .decision {
+            font-size: 20px;
+            font-weight: bold;
+            color: #cc0000;
+            margin: 1cm 0;
+        }
+        .remarks {
+            margin: 1cm 0;
+            padding: 1cm;
+            background-color: #f5f5f5;
+            border-left: 4px solid #cc0000;
+        }
+        .signature {
+            margin-top: 2cm;
+            border-top: 1px solid #ccc;
+            padding-top: 1cm;
+        }
+        .signature-image {
+            max-width: 200px;
+            max-height: 100px;
+        }
+        .footer {
+            margin-top: 2cm;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="title">{{ document_title }}</div>
+        <div class="subtitle">Official Denial Document</div>
+    </div>
+
+    <div class="metadata">
+        <div class="metadata-item">
+            <strong>Document ID:</strong> {{ document_id }}
+        </div>
+        <div class="metadata-item">
+            <strong>Generated:</strong> {{ generation_date }}
+        </div>
+        <div class="metadata-item">
+            <strong>Created By:</strong> {{ username }}
+        </div>
+        <div class="metadata-item">
+            <strong>Email:</strong> {{ useremail }}
+        </div>
+    </div>
+
+    <div class="decision">
+        Decision: DENIED
+    </div>
+
+    <div>
+        We regret to inform you that your request for <strong>{{ document_title }}</strong> has been reviewed and <strong>denied</strong>. 
+        Please refer to the notes below for clarification.
+    </div>
+
+    <div class="remarks">
+        <strong>Administrator's Remarks:</strong><br>
+        {{ custom_text }}
+    </div>
+
+    <div class="signature">
+        <div style="width: 7cm; border-top: 1px solid #000; margin-bottom: 0.5cm;"></div>
+        {% if admin_signature %}
+            <img src="{{ admin_signature }}" alt="Admin Signature" class="signature-image">
+        {% endif %}
+        <div>
+            <strong>{{ adminname }}</strong><br>
+            {{ adminposition }}
+        </div>
+    </div>
+
+    <div class="footer">
+        <div style="color: #cc0000; font-style: italic;">
+            This document was generated and digitally signed by the Team Moose Jaw UMS system.
+        </div>
+        <div style="font-size: 10px; margin-top: 0.5cm;">
+            Digital verification available at https://teammoosejaw.com/verify/{{ document_id }}
+        </div>
+    </div>
+</body>
+</html> 

@@ -1,107 +1,24 @@
-{% extends 'ums/welcome.html' %}
+{% extends 'base.html' %}
 
 {% block content %}
-<div class="container pt-5">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card shadow">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Create New Template</h5>
-                    <a href="{% url 'template_list' %}" class="btn btn-secondary btn-sm">Back to Templates</a>
-                </div>
-                <div class="card-body">
-                    <form method="post">
-                        {% csrf_token %}
-                        
-                        <div class="mb-3">
-                            <label for="name" class="form-label">Template Name</label>
-                            <input type="text" class="form-control" id="name" name="name" required>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="description" class="form-label">Description</label>
-                            <textarea class="form-control" id="description" name="description" rows="2"></textarea>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="latex_content" class="form-label">LaTeX Content</label>
-                            <textarea class="form-control font-monospace" id="latex_content" name="latex_content" rows="20" required>
-\documentclass[12pt]{article}
-\usepackage[a4paper, margin=1in]{geometry}
-\usepackage{graphicx}
-\usepackage{tikz}
-\usepackage{xcolor}
-\usepackage{qrcode}
-\usepackage{hyperref}
-
-% Define colors
-\definecolor{moosejawblue}{RGB}{0, 102, 204}
-
-% Document signature information
-% These will be replaced with actual values during generation
-\newcommand{\documentid}{{{document_id}}}
-\newcommand{\documenttitle}{{{document_title}}}
-\newcommand{\username}{{{user_name}}}
-\newcommand{\useremail}{{{user_email}}}
-\newcommand{\generationdate}{{{generation_date}}}
-\newcommand{\customtext}{{{custom_text}}}
-
-\begin{document}
-
-\begin{center}
-    % Logo path will be adjusted during generation
-    \includegraphics[width=3cm]{/home/pavdog/TeamMooseJaw/static/img/moose_jaw_logo.png}
-    \vspace{1cm}
-    
-    {\Large\textbf{\documenttitle}}
-    \vspace{0.5cm}
-    
-    {\large\textbf{Official Document}}
-    \vspace{1cm}
-\end{center}
-
-\begin{tikzpicture}[overlay, remember picture]
-    \node[anchor=north east, xshift=-1cm, yshift=-1cm] at (current page.north east) {
-        \qrcode[height=2cm]{Document ID: \documentid, Generated: \generationdate}
-    };
-\end{tikzpicture}
-
-\noindent\rule{\linewidth}{1pt}
-\vspace{0.5cm}
-
-\noindent\textbf{Document ID:} \documentid\\
-\noindent\textbf{Generated:} \generationdate\\
-\noindent\textbf{Created By:} \username\\
-\noindent\textbf{Email:} \useremail
-
-\vspace{1cm}
-
-\begin{center}
-    \fbox{\parbox{0.9\textwidth}{\customtext}}
-\end{center}
-
-\vspace{2cm}
-
-\noindent\rule{7cm}{0.5pt}\\
-\noindent\textbf{Authorized Signature}
-
-\vspace{1cm}
-
-\begin{center}
-    {\color{moosejawblue}\textit{This document was generated and digitally signed by the Team Moose Jaw UMS system.}}\\
-    {\small\textit{Digital verification available at https://teammoosejaw.com/verify/\documentid}}
-\end{center}
-
-\end{document}
-                            </textarea>
-                            <div class="form-text">LaTeX template with placeholders in double curly braces. Available variables: document_id, document_title, user_name, user_email, generation_date, custom_text</div>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary">Create Template</button>
-                    </form>
-                </div>
-            </div>
+<div class="container mt-4">
+    <h2>Create PDF Template</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="name" class="form-label">Template Name</label>
+            <input type="text" class="form-control" id="name" name="name" required>
         </div>
-    </div>
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="html_content" class="form-label">HTML Content</label>
+            <textarea class="form-control font-monospace" id="html_content" name="html_content" rows="20" required></textarea>
+            <div class="form-text">HTML template with placeholders. Available variables: document_id, document_title, username, useremail, generation_date, custom_text, adminname, adminposition</div>
+        </div>
+        <button type="submit" class="btn btn-primary">Create Template</button>
+    </form>
 </div>
 {% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Special Circumstance Request</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="degree" class="form-label">Degree</label>
+            <select name="degree" class="form-select" required>
+                <option value="Master">Master</option>
+                <option value="Doctorate">Doctorate</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="graduation_date" class="form-label">Expected Graduation Date</label>
+            <input type="text" name="graduation_date" class="form-control" required placeholder="e.g. May 2025">
+        </div>
+        <div class="mb-3">
+            <label for="special_request_type" class="form-label">Request Type</label>
+            <input type="text" name="special_request_type" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label for="reason" class="form-label">Reason</label>
+            <textarea name="reason" class="form-control" rows="4" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit Request</button>
+    </form>
+</div>
+{% endblock %}

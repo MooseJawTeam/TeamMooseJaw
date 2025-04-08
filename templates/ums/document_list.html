@@ -1,0 +1,80 @@
+{% extends "ums/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Documents</h2>
+        <a href="{% url 'generate_document' %}" class="btn btn-primary">
+            <i class="fas fa-plus-circle me-1"></i>New Document
+        </a>
+    </div>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+            <a class="nav-link {% if current_tab == 'all' %}active{% endif %}" 
+               href="{% url 'document_list' %}?tab=all">
+                <i class="fas fa-file-alt me-1"></i>All Documents
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if current_tab == 'pending' %}active{% endif %}" 
+               href="{% url 'document_list' %}?tab=pending">
+                <i class="fas fa-clipboard-check me-1"></i>Pending Signatures
+            </a>
+        </li>
+    </ul>
+    
+    {% if documents %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Document Title</th>
+                        <th>Created By</th>
+                        <th>Created At</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doc in documents %}
+                        <tr>
+                            <td>{{ doc.title }}</td>
+                            <td>{{ doc.created_by.name }}</td>
+                            <td>{{ doc.created_at|date:"F j, Y, g:i a" }}</td>
+                            <td>
+                                {% if doc.signed_by %}
+                                    <span class="document-status status-approved">Signed</span>
+                                {% else %}
+                                    <span class="document-status status-pending">Pending Signature</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'view_document' doc.id %}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                                {% if not doc.signed_by.all and user_role == 'Admin' or doc.created_by_id == request.session.user_id %}
+                                    <a href="{% url 'sign_document' doc.id %}" class="btn btn-sm btn-success">
+                                        <i class="fas fa-check"></i> Sign
+                                    </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            {% if current_tab == 'pending' %}
+                No documents are currently pending signature.
+            {% else %}
+                No documents found.
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

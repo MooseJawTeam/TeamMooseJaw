@@ -1,0 +1,63 @@
+{% extends 'ums/base.html' %}
+
+{% block title %}Special Circumstance Form List{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Special Circumstance Form List</h2>
+    
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Email</th>
+                    <th>Degree</th>
+                    <th>Graduation Date</th>
+                    <th>Reason</th>
+                    <th>Request Type</th>
+                    <th>Submitted At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for form in forms %}
+                <tr>
+                    <td>{{ form.user.name }}</td>
+                    <td>{{ form.user.email }}</td>
+                    <td>{{ form.degree }}</td>
+                    <td>{{ form.graduation_date }}</td>
+                    <td>{{ form.reason }}</td>
+                    <td>{{ form.special_request_type }}</td>
+                    <td>{{ form.submitted_at }}</td>
+                    <td>
+                        <form method="post" action="{% url 'admin_special_list' %}" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="form_id" value="{{ form.id }}">
+                            <div class="btn-group" role="group">
+                                <button type="submit" name="decision" value="Pass" class="btn btn-success btn-sm">Approve</button>
+                                <button type="submit" name="decision" value="Fail" class="btn btn-danger btn-sm">Deny</button>
+                            </div>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center">No Special Circumstance forms found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %} 

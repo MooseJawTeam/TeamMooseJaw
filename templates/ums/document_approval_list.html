@@ -1,0 +1,51 @@
+{% extends "ums/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">Pending Document Approvals</h2>
+    
+    {% if pending_documents %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Document Title</th>
+                        <th>Created By</th>
+                        <th>Created At</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doc in pending_documents %}
+                        <tr>
+                            <td>{{ doc.title }}</td>
+                            <td>{{ doc.created_by.name }}</td>
+                            <td>{{ doc.created_at|date:"F j, Y, g:i a" }}</td>
+                            <td>
+                                <span class="document-status status-pending">Pending Signature</span>
+                            </td>
+                            <td>
+                                <a href="{% url 'view_document' doc.id %}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                                {% if user_role == 'Admin' or doc.created_by_id == request.session.user_id %}
+                                    <a href="{% url 'sign_document' doc.id %}" class="btn btn-sm btn-success">
+                                        <i class="fas fa-check"></i> Sign
+                                    </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            No documents are currently pending signature.
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

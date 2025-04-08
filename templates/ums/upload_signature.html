@@ -1,0 +1,32 @@
+{% extends "ums/base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Upload Admin Signature</h2>
+    <div class="row">
+        <div class="col-md-6">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="signature_image">Signature Image</label>
+                    <input type="file" class="form-control" id="signature_image" name="signature_image" accept="image/*" required>
+                    <small class="form-text text-muted">Upload a clear image of your signature. PNG format recommended.</small>
+                </div>
+                <button type="submit" class="btn btn-primary">Upload Signature</button>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Current Signature</h5>
+                    {% if admin_signature %}
+                        <img src="{{ admin_signature.signature_image.url }}" alt="Current Signature" class="img-fluid">
+                    {% else %}
+                        <p>No signature uploaded yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

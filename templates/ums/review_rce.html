@@ -1,0 +1,58 @@
+{% extends "ums/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0">Review RCE Request</h3>
+                    <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h5>Student Information</h5>
+                        <p><strong>Name:</strong> {{ form.user.name }}</p>
+                        <p><strong>Email:</strong> {{ form.user.email }}</p>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5>Request Details</h5>
+                        <p><strong>Exam Date:</strong> {{ form.exam_date }}</p>
+                        <p><strong>Semester:</strong> {{ form.semester }}</p>
+                        <p><strong>Comments:</strong> {{ form.comments }}</p>
+                        <p><strong>Submitted:</strong> {{ form.submitted_at|date:"Y-m-d H:i" }}</p>
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="decision" class="form-label">Decision</label>
+                            <select class="form-select" id="decision" name="decision" required>
+                                <option value="">Select a decision</option>
+                                <option value="Pass">Pass</option>
+                                <option value="Fail">Fail</option>
+                            </select>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="submit" name="action" value="approve" class="btn btn-success">
+                                <i class="fas fa-check me-1"></i>Approve
+                            </button>
+                            <button type="submit" name="action" value="deny" class="btn btn-danger">
+                                <i class="fas fa-times me-1"></i>Deny
+                            </button>
+                            <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

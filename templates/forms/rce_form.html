@@ -1,0 +1,163 @@
+{% extends "ums/base.html" %}
+
+{% block content %}
+<div class="container mt-4" style="max-width: 800px;">
+    <div class="text-center mb-3">
+        <img src="static/img/UH-Primary-Extensions-College of Natural Sciences and Mathematics_RGB_Vertical.png" alt="University of Houston Logo" class="img-fluid" style="max-height: 80px;">
+    </div>
+    
+    <h1 class="text-center mb-3" style="font-size: 1.8rem;">RCE Exam Evaluation Form</h1>
+    
+    <form method="post" action="{% url 'submit_rce' %}">
+        {% csrf_token %}
+
+        <!-- Student Information -->
+        <div class="card mb-3">
+            <div class="card-header py-2">
+                <h2 class="mb-0" style="font-size: 1.2rem;">Student Information</h2>
+            </div>
+            <div class="card-body py-2">
+                <div class="mb-2">
+                    <label for="id" class="form-label">Select Student:</label>
+                    <select class="form-select form-select-sm" id="id" name="id" required>
+                        <option value="">Select a student...</option>
+                        {% for user in users %}
+                            {% if user.role == 'Basic' %}
+                                <option value="{{ user.id }}">{{ user.name }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <label for="exam_date" class="form-label">Exam Date:</label>
+                        <input type="date" name="exam_date" class="form-control form-control-sm" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="semester" class="form-label">Semester:</label>
+                        <input type="text" name="semester" class="form-control form-control-sm" required>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rubric -->
+        <div class="card mb-3">
+            <div class="card-header py-2">
+                <h2 class="mb-0" style="font-size: 1.2rem;">Rubric</h2>
+                <p class="text-muted mb-0" style="font-size: 0.8rem;">(To be completed by RCE Committee Chair)</p>
+            </div>
+            <div class="card-body py-2">
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th style="width: 50%">Criteria</th>
+                                <th>Below</th>
+                                <th>Meets</th>
+                                <th>Above</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Communicate effectively orally</td>
+                                <td><input type="radio" name="oral" value="below" required></td>
+                                <td><input type="radio" name="oral" value="meets" required></td>
+                                <td><input type="radio" name="oral" value="above" required></td>
+                            </tr>
+                            <tr>
+                                <td>Communicate effectively in writing</td>
+                                <td><input type="radio" name="written" value="below" required></td>
+                                <td><input type="radio" name="written" value="meets" required></td>
+                                <td><input type="radio" name="written" value="above" required></td>
+                            </tr>
+                            <tr>
+                                <td>Defined the research problem</td>
+                                <td><input type="radio" name="problem" value="below" required></td>
+                                <td><input type="radio" name="problem" value="meets" required></td>
+                                <td><input type="radio" name="problem" value="above" required></td>
+                            </tr>
+                            <tr>
+                                <td>Critically evaluated existing research</td>
+                                <td><input type="radio" name="eval" value="below" required></td>
+                                <td><input type="radio" name="eval" value="meets" required></td>
+                                <td><input type="radio" name="eval" value="above" required></td>
+                            </tr>
+                            <tr>
+                                <td>Proposed and justified methods</td>
+                                <td><input type="radio" name="methods" value="below" required></td>
+                                <td><input type="radio" name="methods" value="meets" required></td>
+                                <td><input type="radio" name="methods" value="above" required></td>
+                            </tr>
+                            <tr>
+                                <td>Described and interpreted results</td>
+                                <td><input type="radio" name="results" value="below" required></td>
+                                <td><input type="radio" name="results" value="meets" required></td>
+                                <td><input type="radio" name="results" value="above" required></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comments and Feedback -->
+        <div class="card mb-3">
+            <div class="card-header py-2">
+                <h2 class="mb-0" style="font-size: 1.2rem;">Comments and Feedback</h2>
+            </div>
+            <div class="card-body py-2">
+                <div class="mb-2">
+                    <label for="comments" class="form-label">Committee Comments:</label>
+                    <textarea name="comments" class="form-control form-control-sm" rows="3" required></textarea>
+                </div>
+                <div class="mb-2">
+                    <label for="admin_comment" class="form-label">Admin Comments (Optional):</label>
+                    <textarea name="admin_comment" class="form-control form-control-sm" rows="2"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Evaluation Outcome -->
+        <div class="card mb-3">
+            <div class="card-header py-2">
+                <h2 class="mb-0" style="font-size: 1.2rem;">Evaluation Outcome</h2>
+            </div>
+            <div class="card-body py-2">
+                <div class="mb-2">
+                    <label for="committee_result" class="form-label">Committee Decision:</label>
+                    <select name="committee_result" class="form-select form-select-sm" required>
+                        <option value="">Select a decision...</option>
+                        <option value="pending">Pending</option>
+                        <option value="pass">Pass</option>
+                        <option value="fail">Fail</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary btn-sm">Submit Evaluation</button>
+        </div>
+    </form>
+</div>
+
+<style>
+    .table td {
+        text-align: center;
+        vertical-align: middle;
+        padding: 0.3rem;
+    }
+    .table th {
+        text-align: center;
+        padding: 0.3rem;
+    }
+    .form-label {
+        margin-bottom: 0.2rem;
+        font-size: 0.9rem;
+    }
+    .card-header {
+        background-color: #f8f9fa;
+    }
+</style>
+{% endblock %}
