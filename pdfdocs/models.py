@@ -60,6 +60,6 @@ class DocumentSignature(models.Model):
      time_approved = models.DateTimeField(auto_now =True)
 
     def __str__(self):
-        return f"Approval {self.status} by {self.approve.username} for {self.document.name}"
+        return f"Approval {self.action} by {self.approve.username} for {self.document.name}"
      
      
