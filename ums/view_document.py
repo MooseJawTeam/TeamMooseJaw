@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.conf import settings
 from django.db import models
 import os
-from .models import DocumentTemplate, GeneratedDocument, DocumentSignature
+from .models import DocumentTemplate, GeneratedDocument, DocumentSignature, DocumentApproval
 from ums.models import Users
 from ums.decorators import role_required
 import os
@@ -66,65 +66,89 @@ def document_list(request):
     return render(request, 'ums/document_list.html', context)
 
 
-@role_required(["admin", "Basicuser"])
-def view_document(request, doc_id):
-    """View a specific document"""
+@role_required(['Admin', 'Basicuser'])
+def view_document(request, document_id):
     try:
         user_id = request.session.get('user_id')
         if not user_id:
-            messages.error(request, "Please log in to view this document")
-            return redirect('index')
-            
-        user = get_object_or_404(Users, id=user_id)
-        document = get_object_or_404(GeneratedDocument, id=doc_id)
-        
-        # Check permissions
-        if not user.is_admin() and user != document.created_by and not document.signed_by.filter(id=user.id).exists():
-            messages.error(request, "You don't have permission to view this document")
+            messages.error(request, 'Please log in to view documents.')
+            return redirect('login')
+
+        user = Users.objects.get(id=user_id)
+        document = GeneratedDocument.objects.get(id=document_id)
+
+        # Check if user has permission to view this document
+        if user.role == 'Basicuser' and document.created_by != user:
+            messages.error(request, 'You do not have permission to view this document.')
             return redirect('document_list')
-        
-        signatures = DocumentSignature.objects.filter(document=document).order_by('timestamp')
-        
-        # Check if the user has already signed
-        already_signed = DocumentSignature.objects.filter(document=document, user=user).exists()
-        
-        # Get the absolute file path
-        file_path = document.get_absolute_file_path()
+
+        # Get document signatures
+        signatures = DocumentSignature.objects.filter(document=document)
+        has_signed = signatures.filter(user=user).exists()
+
+        # Get document approval status
+        approval = DocumentApproval.objects.filter(document=document).first()
+
+        # Get the absolute file path for the document
+        file_path = os.path.join(settings.MEDIA_ROOT, document.file_path)
         if not os.path.exists(file_path):
-            messages.error(request, "Document file not found")
+            messages.error(request, 'Document file not found.')
             return redirect('document_list')
-            
+
+        context = {
+            'document': document,
+            'signatures': signatures,
+            'has_signed': has_signed,
+            'approval': approval,
+            'user': user,
+            'file_path': document.file_path,
+            'MEDIA_URL': settings.MEDIA_URL
+        }
+        return render(request, 'pdfdocs/view_document.html', context)
+
+    except GeneratedDocument.DoesNotExist:
+        messages.error(request, 'Document not found.')
+        return redirect('document_list')
+    except Exception as e:
+        messages.error(request, f'An error occurred: {str(e)}')
+        return redirect('document_list')
+
+
+@role_required(['Admin', 'Basicuser'])
+def download_document(request, document_id):
+    """Download a specific document"""
+    try:
+        user_id = request.session.get('user_id')
+        if not user_id:
+            messages.error(request, 'Please log in to download documents.')
+            return redirect('login')
+
+        user = Users.objects.get(id=user_id)
+        document = GeneratedDocument.objects.get(id=document_id)
+
+        # Check if user has permission to download this document
+        if user.role == 'Basicuser' and document.created_by != user:
+            messages.error(request, 'You do not have permission to download this document.')
+            return redirect('document_list')
+
+        # Get the absolute file path
+        file_path = os.path.join(settings.MEDIA_ROOT, document.file_path)
+        if not os.path.exists(file_path):
+            messages.error(request, 'Document file not found.')
+            return redirect('document_list')
+
         # Read the PDF file
         with open(file_path, 'rb') as pdf:
             response = HttpResponse(pdf.read(), content_type='application/pdf')
-            response['Content-Disposition'] = f'inline; filename="{document.title}.pdf"'
+            response['Content-Disposition'] = f'attachment; filename="{document.title}.pdf"'
             return response
-            
+
+    except GeneratedDocument.DoesNotExist:
+        messages.error(request, 'Document not found.')
+        return redirect('document_list')
     except Exception as e:
-        logger.error(f"Error viewing document: {str(e)}")
-        messages.error(request, "An error occurred while viewing the document")
+        messages.error(request, f'An error occurred: {str(e)}')
         return redirect('document_list')
-
-
-@role_required(["admin", "Basicuser"])
-def download_document(request, doc_id):
-    """Download the PDF document"""
-    user_id = request.session.get('user_id')
-    user = get_object_or_404(Users, id=user_id)
-    document = get_object_or_404(GeneratedDocument, id=doc_id)
-    
-    # Check permissions
-    if not user.is_admin() and user != document.created_by and not document.signed_by.filter(id=user.id).exists():
-        messages.error(request, "You don't have permission to download this document")
-        return redirect('document_list')
-    
-    file_path = document.get_absolute_file_path()
-    if not os.path.exists(file_path):
-        messages.error(request, "Document file not found")
-        return redirect('document_list')
-    
-    response = FileResponse(open(file_path, 'rb'), as_attachment=True, filename=f"{document.title}.pdf")
-    return response
 
 
 @role_required(["Admin", "admin"])

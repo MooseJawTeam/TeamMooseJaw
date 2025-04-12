@@ -102,13 +102,13 @@
 
     <div class="signature">
         <div style="width: 7cm; border-top: 1px solid #000; margin-bottom: 0.5cm;"></div>
-        {% if admin_signature %}
-            <img src="{{ admin_signature }}" alt="Admin Signature" class="signature-image">
-        {% endif %}
         <div>
             <strong>{{ adminname }}</strong><br>
             {{ adminposition }}
         </div>
+        {% if admin_signature %}
+            <img src="{{ admin_signature }}" alt="Admin Signature" class="signature-image">
+        {% endif %}
     </div>
 
     <div class="footer">

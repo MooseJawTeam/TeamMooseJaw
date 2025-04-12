@@ -61,6 +61,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
 ]
 
 ROOT_URLCONF = 'moosejawums.urls'
@@ -182,6 +183,3 @@ MESSAGE_TAGS = {
     messages.INFO: "info",
     messages.WARNING: "warning",
 }
-
-# Login URL configuration
-LOGIN_URL = 'ums-login'  # This points to our custom login URL
