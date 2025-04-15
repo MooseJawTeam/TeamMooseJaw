@@ -25,7 +25,7 @@ sudo apt-get install libcairo2-dev libpango1.0-dev libgdk-pixbuf2.0-dev libffi-d
 
 ## Environment Variables
 Before running the application, you need to create a `.env` file in the `django_app` directory with the following Microsoft credentials:
-```
+
 TENANT_ID=7ce5bdd5-fdda-44b4-a37d-c69818c0d01a
 CLIENT_ID=fa2e1d80-7b4a-4d99-8c42-b8075affdd93
 CLIENT_SECRET=<GET_FROM_christaO2>
