@@ -27,7 +27,7 @@ Before running the application, you need to create a `.env` file in the `django_
 
 TENANT_ID=7ce5bdd5-fdda-44b4-a37d-c69818c0d01a
 CLIENT_ID=fa2e1d80-7b4a-4d99-8c42-b8075affdd93
-CLIENT_SECRET=<GET_FROM_christaO2> #### if you are the TA Please check the assinment submission Github doesn't allow to push secrets
+CLIENT_SECRET=<GET_FROM_christaO2> #### if you are the TA Please check the assignment Implementation of v0.2 submission2 Github doesn't allow to push secrets
 ```
 
 ## Start server
