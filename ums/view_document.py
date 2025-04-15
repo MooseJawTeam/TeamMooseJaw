@@ -95,12 +95,24 @@ def view_document(request, document_id):
             messages.error(request, 'Document file not found.')
             return redirect('document_list')
 
+        # Check if this is a download request
+        if request.GET.get('download') == 'true':
+            with open(file_path, 'rb') as pdf:
+                response = HttpResponse(pdf.read(), content_type='application/pdf')
+                response['Content-Disposition'] = f'attachment; filename="{document.title}.pdf"'
+                return response
+
+        # For viewing, convert PDF to base64
+        with open(file_path, 'rb') as pdf:
+            pdf_base64 = base64.b64encode(pdf.read()).decode('utf-8')
+
         context = {
             'document': document,
             'signatures': signatures,
             'has_signed': has_signed,
             'approval': approval,
             'user': user,
+            'pdf_base64': pdf_base64,
             'file_path': document.file_path,
             'MEDIA_URL': settings.MEDIA_URL
         }

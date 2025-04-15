@@ -26,14 +26,16 @@
                     </p>
                 </div>
                 <div class="col-md-6 text-end">
-                    <a href="{% url 'download_document' document.id %}" class="btn btn-primary">
-                        <i class="fas fa-download"></i> Download PDF
-                    </a>
-                    {% if not has_signed and user.role == 'Basicuser' %}
-                        <a href="{% url 'sign_document' document.id %}" class="btn btn-success">
-                            <i class="fas fa-signature"></i> Sign Document
+                    <div class="btn-group">
+                        <a href="?download=true" class="btn btn-primary">
+                            <i class="fas fa-download"></i> Download PDF
                         </a>
-                    {% endif %}
+                        {% if not has_signed and user.role == 'Basicuser' %}
+                            <a href="{% url 'sign_document' document.id %}" class="btn btn-success">
+                                <i class="fas fa-signature"></i> Sign Document
+                            </a>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
 
@@ -46,11 +48,15 @@
 
             <!-- PDF Viewer -->
             <div class="mt-4">
-                <div class="embed-responsive" style="height: 800px;">
-                    <iframe class="embed-responsive-item w-100 h-100" 
-                            src="{{ MEDIA_URL }}{{ file_path }}" 
-                            type="application/pdf">
-                    </iframe>
+                <div class="pdf-viewer-container" style="height: 800px; border: 1px solid #ddd; border-radius: 4px;">
+                    <object data="data:application/pdf;base64,{{ pdf_base64 }}" 
+                            type="application/pdf" 
+                            width="100%" 
+                            height="100%"
+                            style="border: none;">
+                        <p>It appears you don't have a PDF plugin for this browser. 
+                           You can <a href="?download=true">download the PDF file</a> instead.</p>
+                    </object>
                 </div>
             </div>
 
