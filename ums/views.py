@@ -263,10 +263,7 @@ def submit_rce_form(request):
         )
         messages.success(request, "RCE request submitted successfully! It will be reviewed by an administrator.")
         return redirect('user')
-    
-    # Get all basic users for the student dropdown
-    users = Users.objects.filter(role='Basic')
-    return render(request, 'forms/rce_form.html', {'users': users})
+    return render(request, 'forms/rce_form.html')
 
 def submit_special_form(request):
     if request.method == 'POST':
@@ -311,7 +308,7 @@ def generate_decision_document(form, decision, admin_user):
     
     # Create document template if it doesn't exist
     template, created = DocumentTemplate.objects.get_or_create(
-        name=f"{decision} Decision Template",
+        name=template_name,  # Use the actual template name instead of constructing one
         defaults={
             'description': f"Template for {decision} decisions",
             'html_content': render_to_string(f'pdf_templates/{template_name}', context)
@@ -480,112 +477,4 @@ def upload_signature(request):
             return redirect('upload_signature')
     
     return render(request, 'ums/upload_signature.html', {'admin_signature': admin_signature})
-
-@login_required
-def submit_rce(request):
-    if request.method == 'GET':
-        # Get all basic users for the student dropdown
-        users = Users.objects.filter(role='Basic')
-        # Get admin's active signature if exists
-        admin = Users.objects.get(id=request.session['user_id'])
-        admin_signature = AdminSignature.objects.filter(admin=admin, is_active=True).first()
-        
-        return render(request, 'ums/submit_rce.html', {
-            'users': users,
-            'admin_signature': admin_signature
-        })
-    
-    if request.method == 'POST':
-        try:
-            # Get the student being evaluated
-            student_id = request.POST.get('student_id')
-            student = Users.objects.get(id=student_id, role='Basic')
-            
-            # Get the admin user
-            admin = Users.objects.get(id=request.session['user_id'])
-            
-            # Handle signature
-            signature_option = request.POST.get('signature_option')
-            signature_url = None
-            
-            if signature_option == 'existing':
-                # Use existing signature
-                admin_signature = AdminSignature.objects.filter(admin=admin, is_active=True).first()
-                if admin_signature:
-                    signature_url = admin_signature.signature_image.url
-            elif signature_option == 'new' and 'signature_image' in request.FILES:
-                # Upload new signature
-                signature_file = request.FILES['signature_image']
-                # Deactivate any existing active signature
-                AdminSignature.objects.filter(admin=admin, is_active=True).update(is_active=False)
-                # Create new signature
-                new_signature = AdminSignature.objects.create(
-                    admin=admin,
-                    signature_image=signature_file
-                )
-                signature_url = new_signature.signature_image.url
-            
-            # Create RCE form
-            rce_form = RCEForm.objects.create(
-                user=student,
-                exam_date=request.POST.get('exam_date'),
-                semester=request.POST.get('semester'),
-                comments=request.POST.get('comments'),
-                decision=request.POST.get('decision'),
-                chair_name=request.POST.get('chair_name'),
-                member1=request.POST.get('member1'),
-                member2=request.POST.get('member2'),
-                methodology=request.POST.get('methodology'),
-                analysis=request.POST.get('analysis'),
-                literature=request.POST.get('literature'),
-                status='Pending'
-            )
-
-            # Generate PDF
-            template = get_template('pdf_templates/rce_evaluation.html')
-            context = {
-                'student_name': student.name,
-                'student_id': student.id,
-                'exam_date': rce_form.exam_date,
-                'semester': rce_form.semester,
-                'methodology': rce_form.methodology,
-                'analysis': rce_form.analysis,
-                'literature': rce_form.literature,
-                'comments': rce_form.comments,
-                'chair_name': rce_form.chair_name,
-                'member1': rce_form.member1,
-                'member2': rce_form.member2,
-                'decision': rce_form.decision,
-                'admin_signature': signature_url,
-                'adminname': admin.name,
-                'adminposition': admin.position
-            }
-            html = template.render(context)
-            
-            # Generate PDF
-            pdf = generate_pdf(html)
-            
-            # Save PDF to media directory
-            filename = f'rce_evaluation_{student.id}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
-            filepath = os.path.join('rce_evaluations', filename)
-            
-            # Ensure directory exists
-            os.makedirs(os.path.join(settings.MEDIA_ROOT, 'rce_evaluations'), exist_ok=True)
-            
-            # Save PDF
-            with open(os.path.join(settings.MEDIA_ROOT, filepath), 'wb') as f:
-                f.write(pdf)
-            
-            # Update RCE form with PDF path
-            rce_form.pdf_path = filepath
-            rce_form.save()
-            
-            messages.success(request, 'RCE evaluation submitted successfully!')
-            return redirect('admin_dashboard')
-            
-        except Exception as e:
-            messages.error(request, f'Error submitting RCE evaluation: {str(e)}')
-            return redirect('submit_rce')
-    
-    return redirect('admin_dashboard')
 

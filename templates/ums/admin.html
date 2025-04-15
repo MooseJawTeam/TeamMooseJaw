@@ -59,7 +59,7 @@
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title mb-0">
-                                <i class="fas fa-file-alt me-2"></i>Pending Special Circumstance Requests
+                                <i class="fas fa-file-alt me-2"></i>Pending Special Requests
                             </h3>
                         </div>
                         <div class="card-body">
@@ -70,7 +70,7 @@
                                             <tr>
                                                 <th>Student</th>
                                                 <th>Degree</th>
-                                                <th>Graduation Date</th>
+                                                <th>Type</th>
                                                 <th>Submitted</th>
                                                 <th>Actions</th>
                                             </tr>
@@ -80,7 +80,7 @@
                                             <tr>
                                                 <td>{{ form.user.name }}</td>
                                                 <td>{{ form.degree }}</td>
-                                                <td>{{ form.graduation_date }}</td>
+                                                <td>{{ form.special_request_type }}</td>
                                                 <td>{{ form.submitted_at|date:"Y-m-d H:i" }}</td>
                                                 <td>
                                                     <a href="{% url 'review_special' form.id %}" class="btn btn-sm btn-primary">
@@ -93,7 +93,7 @@
                                     </table>
                                 </div>
                             {% else %}
-                                <p class="text-muted">No pending special circumstance requests.</p>
+                                <p class="text-muted">No pending special requests.</p>
                             {% endif %}
                         </div>
                     </div>

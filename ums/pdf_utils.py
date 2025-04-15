@@ -58,12 +58,9 @@ def generate_pdf(template_id, data, user, admin_name, admin_position):
                 signature_base64 = base64.b64encode(img_file.read()).decode('utf-8')
             data['admin_signature'] = f"data:image/png;base64,{signature_base64}"
         
-        # Determine which template to use based on the decision
-        template_name = "approved.html" if data.get('decision') == "Pass" else "denied.html"
-        
         # Render the HTML template
         html_string = render_to_string(
-            f'pdf_templates/{template_name}',
+            f'pdf_templates/{template.name}',
             data
         )
         
