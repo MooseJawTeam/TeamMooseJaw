@@ -1,29 +1,31 @@
-# This Dockerfile is for building a Docker image for a Python application.
-# It uses the official Python 3.12.3 slim image based on Debian Bullseye as the base image.
-FROM python:3.12.3-slim-bullseye
+FROM python:3.11-slim-bullseye
 
-#Set an environment variable to ubuffer python output, aiding logging and debugging.
-ENV PYTHONBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
-#Define an environment variable for the web service's port
-ENV PORT=8000
-
-#Set the working directory to /app
 WORKDIR /app
 
-#Copy the entire current directory contents into the container at /app
-COPY . /app/
+RUN apt-get update && apt-get install -y \
+    default-libmysqlclient-dev \
+    libmariadb-dev-compat \
+    libmariadb-dev \
+    build-essential \
+    gcc \
+    libffi-dev \
+    libssl-dev \
+    libpango-1.0-0 \
+    libgdk-pixbuf2.0-0 \
+    libpangoft2-1.0-0 \
+    libpangocairo-1.0-0 \
+    libcairo2 \
+    fonts-liberation \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-#upgrade pip to the latest version
-RUN pip install --upgrade pip
+COPY requirements.txt .
 
-#Install the dependencies listed in requirements.txt
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-#Set the command to run the web service using gunivorn and binding it to 0.0.0.0:"${PORT}"
+COPY . .
 
-CMD gunicorn server.wsgi:application --bind 0.0.0.0:"${PORT}"
-
-
-#Tell Docker that the container listens on the specifiend network port at runtime
-EXPOSE ${PORT}
+CMD ["gunicorn", "moosejawums.wsgi:application", "--bind", "0.0.0.0:8000"]

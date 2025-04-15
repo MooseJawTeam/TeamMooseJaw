@@ -6,22 +6,33 @@
     <style>
         @page {
             size: A4;
-            margin: 2cm;
+            margin: 1cm;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
         }
         body {
             font-family: Arial, sans-serif;
             line-height: 1.6;
             color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .content {
+            flex: 1;
         }
         .header {
             text-align: center;
-            margin-bottom: 2cm;
+            margin-bottom: 1cm;
         }
         .title {
             font-size: 24px;
             font-weight: bold;
             color: #0066cc;
-            margin-bottom: 1cm;
+            margin-bottom: 0.5cm;
         }
         .subtitle {
             font-size: 18px;
@@ -30,84 +41,89 @@
         }
         .metadata {
             border-top: 2px solid #0066cc;
-            padding-top: 1cm;
-            margin-bottom: 1cm;
+            padding-top: 0.5cm;
+            margin-bottom: 0.5cm;
         }
         .metadata-item {
-            margin-bottom: 0.5cm;
+            margin-bottom: 0.3cm;
         }
         .decision {
             font-size: 20px;
             font-weight: bold;
             color: #0066cc;
-            margin: 1cm 0;
+            margin: 0.5cm 0;
         }
         .remarks {
-            margin: 1cm 0;
-            padding: 1cm;
+            margin: 0.5cm 0;
+            padding: 0.5cm;
             background-color: #f5f5f5;
             border-left: 4px solid #0066cc;
         }
         .signature {
-            margin-top: 2cm;
-            border-top: 1px solid #ccc;
-            padding-top: 1cm;
+            margin-top: 1cm;
+            padding-top: 0.5cm;
+        }
+        .signature-line {
+            width: 7cm;
+            border-top: 1px solid #000;
+            margin-top: 0.3cm;
+            margin-bottom: 0.1cm;
         }
         .signature-image {
             max-width: 200px;
             max-height: 100px;
+            margin-bottom: 0.3cm;
         }
         .footer {
-            margin-top: 2cm;
             text-align: center;
             font-size: 12px;
             color: #666;
+            padding-top: 1cm;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="title">{{ document_title }}</div>
-        <div class="subtitle">Official Approval Document</div>
-    </div>
-
-    <div class="metadata">
-        <div class="metadata-item">
-            <strong>Document ID:</strong> {{ document_id }}
+    <div class="content">
+        <div class="header">
+            <div style="height: 50px;"></div>
+            <div class="title">{{ document_title }}</div>
+            <div class="subtitle">Official Approval Document</div>
         </div>
-        <div class="metadata-item">
-            <strong>Generated:</strong> {{ generation_date }}
+
+        <div class="metadata">
+            <div style="height: 50px;"></div>
+            <div class="metadata-item">
+                <strong>Document ID:</strong> {{ document_id }}
+            </div>
+            <div class="metadata-item">
+                <strong>Generated:</strong> {{ generation_date }}
+            </div>
+            <div class="metadata-item">
+                <strong>Created By:</strong> {{ username }}
+            </div>
+            <div class="metadata-item">
+                <strong>Email:</strong> {{ useremail }}
+            </div>
         </div>
-        <div class="metadata-item">
-            <strong>Created By:</strong> {{ username }}
+
+        <div class="decision">
+            Decision: APPROVED
         </div>
-        <div class="metadata-item">
-            <strong>Email:</strong> {{ useremail }}
-        </div>
-    </div>
 
-    <div class="decision">
-        Decision: APPROVED
-    </div>
-
-    <div>
-        Your request for <strong>{{ document_title }}</strong> has been reviewed and <strong>approved</strong>. 
-        You may proceed as instructed in the university guidelines.
-    </div>
-
-    <div class="remarks">
-        <strong>Administrator's Remarks:</strong><br>
-        {{ custom_text }}
-    </div>
-
-    <div class="signature">
-        <div style="width: 7cm; border-top: 1px solid #000; margin-bottom: 0.5cm;"></div>
-        {% if admin_signature %}
-            <img src="{{ admin_signature }}" alt="Admin Signature" class="signature-image">
-        {% endif %}
         <div>
-            <strong>{{ adminname }}</strong><br>
-            {{ adminposition }}
+            Your request for <strong>{{ document_title }}</strong> has been reviewed and <strong>approved</strong>. 
+            You may proceed as instructed in the university guidelines.
+        </div>
+
+        <div class="signature">
+            {% if admin_signature %}
+                <img src="{{ admin_signature }}" alt="Admin Signature" class="signature-image">
+            {% endif %}
+            <div class="signature-line"></div>
+            <div>
+                <strong>{{ adminname }}</strong><br>
+                {{ adminposition }}
+            </div>
         </div>
     </div>
 
@@ -115,9 +131,9 @@
         <div style="color: #0066cc; font-style: italic;">
             This document was generated and digitally signed by the Team Moose Jaw UMS system.
         </div>
-        <div style="font-size: 10px; margin-top: 0.5cm;">
+        <div style="font-size: 10px; margin-top: 0.3cm;">
             Digital verification available at https://teammoosejaw.com/verify/{{ document_id }}
         </div>
     </div>
 </body>
-</html> 
+</html>
