@@ -38,5 +38,21 @@ urlpatterns = [
 
     # 🔹 Signature Upload Route
     path('upload-signature/', views.upload_signature, name='upload_signature'),
+    
+    # 🔹 Organizational Management
+    path("organization/", views.organization_list, name="organization_list"),
+    path("organization/create/", views.organization_create, name="organization_create"),
+    path("organization/<int:org_id>/edit/", views.organization_edit, name="organization_edit"),
+    path("organization/<int:org_id>/view/", views.organization_view, name="organization_view"),
+    path("organization/hierarchy/", views.organization_hierarchy, name="organization_hierarchy"),
+
+    # 🔹 User Organization Assignment
+    path("users/assign/", views.assign_user_to_org, name="assign_user_to_org"),
+    path("users/<str:user_id>/organizations/", views.user_organizations, name="user_organizations"),
+    path("organization/<int:org_id>/users/", views.organization_users, name="organization_users"),
+
+    # 🔹 Approver Management
+    path("approvers/", views.approver_list, name="approver_list"),
+    path("approvers/manage/<str:user_id>/<int:org_id>/", views.manage_approver, name="manage_approver"),
 ]
 
