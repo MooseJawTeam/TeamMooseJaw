@@ -90,7 +90,7 @@ WSGI_APPLICATION = 'moosejawums.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
+# Using SQLite for Dev / testing
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.sqlite3',
@@ -98,7 +98,7 @@ WSGI_APPLICATION = 'moosejawums.wsgi.application'
 #     }
 # }
 
-# Use SQLite for development
+# Using live database
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
