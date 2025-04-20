@@ -101,8 +101,12 @@ WSGI_APPLICATION = 'moosejawums.wsgi.application'
 # Use SQLite for development
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'mjapp',
+        'HOST': 'moosejawdb.mysql.database.azure.com',
+        'PORT': '3306', 
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
+        'USER': os.environ.get('DB_USER'),
     }
 }
 
