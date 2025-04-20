@@ -3,9 +3,17 @@ from django.http import HttpResponse, FileResponse
 from django.contrib import messages
 from django.conf import settings
 from django.db import models
+from django.db.models import Q
 import os
-from .models import DocumentTemplate, GeneratedDocument, DocumentSignature, DocumentApproval
-from ums.models import Users
+from .models import (
+    DocumentTemplate, 
+    GeneratedDocument, 
+    DocumentSignature, 
+    DocumentApproval,
+    OrganizationalUnit,
+    UserOrganizationAssignment,
+    Users
+)
 from ums.decorators import role_required
 import os
 import json
@@ -376,6 +384,7 @@ def edit_template(request, template_id):
         return redirect('index')
 
 
+@role_required(['Admin'])
 def document_approval_list(request):
     """
     View for displaying documents that need approval.
@@ -385,25 +394,60 @@ def document_approval_list(request):
         messages.error(request, "Please log in to view pending approvals.")
         return redirect('index')
     
-    user_id = request.session['user_id']
-    user_role = request.session.get('user_role')
+    user = Users.objects.get(id=request.session['user_id'])
     
-    # Get documents that need approval
-    # For admins, show all documents that haven't been signed
-    # For regular users, show only documents they need to approve
-    if user_role == 'Admin':
-        pending_documents = GeneratedDocument.objects.filter(
-            signed_by__isnull=True
-        ).select_related('template', 'created_by').order_by('-created_at')
+    # Get all of the user's organization assignments
+    user_assignments = UserOrganizationAssignment.objects.filter(
+        user=user
+    ).select_related('organizational_unit')
+    
+    # If user is an admin, show all pending approvals
+    if user.role.lower() == 'admin':
+        pending_approvals = DocumentApproval.objects.filter(
+            action="Pending"
+        ).select_related('document', 'approver')
     else:
-        pending_documents = GeneratedDocument.objects.filter(
-            signed_by__isnull=True,
-            created_by_id=user_id
-        ).select_related('template', 'created_by').order_by('-created_at')
+        # Get units where user is an approver
+        approver_units = [
+            assign.organizational_unit
+            for assign in user_assignments
+            if assign.is_approver or assign.is_organizational_approver
+        ]
+        
+        # Include all descendants of units where user is an approver
+        all_units = set(approver_units)
+        for unit in approver_units:
+            if hasattr(unit, 'get_descendants'):
+                all_units.update(unit.get_descendants())
+        
+        # Get pending approvals for these units
+        pending_approvals = DocumentApproval.objects.filter(
+            action="Pending",
+            organizational_unit__in=all_units if all_units else []
+        ).select_related('document', 'approver')
+        
+        # If user is an organizational approver, also include org-level approvals
+        if any(assign.is_organizational_approver for assign in user_assignments):
+            org_approvals = DocumentApproval.objects.filter(
+                action="Pending",
+                is_org_level_approval=True
+            ).select_related('document', 'approver')
+            
+            # Combine querysets if org_approvals exists
+            if org_approvals.exists():
+                pending_approvals = (pending_approvals | org_approvals).distinct()
+    
+    # Get the related documents for these approvals
+    pending_documents = GeneratedDocument.objects.filter(
+        id__in=pending_approvals.values_list('document__id', flat=True)
+    ).select_related('template', 'created_by').order_by('-created_at')
     
     context = {
         'pending_documents': pending_documents,
-        'user_role': user_role
+        'pending_approvals': pending_approvals,
+        'user': user,
+        'user_assignments': user_assignments,
+        'user_role': user.role
     }
     
     return render(request, 'ums/document_approval_list.html', context)
