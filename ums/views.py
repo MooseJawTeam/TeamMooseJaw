@@ -202,7 +202,7 @@ def callback(request):
         user_email = user_data.get("mail") or user_data.get("userPrincipalName")
         user_name = user_data.get("displayName", "Unknown User")
 
-        if not user_id or not user_email:
+        if not user_email or not user_id:
             messages.error(request, "Your Microsoft account is missing an email. Contact support.")
             return redirect("ums-login")
 
