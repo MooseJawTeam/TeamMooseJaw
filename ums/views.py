@@ -5,6 +5,7 @@ from msal import ConfidentialClientApplication
 from django.contrib.auth import login
 from django.contrib.auth.models import AnonymousUser
 import requests
+from django.db.models import Q
 from .models import (
     Users,
     DocumentTemplate,
@@ -14,6 +15,8 @@ from .models import (
     RCEForm,
     SpecialCircumstanceForm,
     AdminSignature,
+    OrganizationalUnit,
+    UserOrganizationAssignment,
 )
 from .decorators import role_required
 from django.contrib import messages
@@ -101,6 +104,14 @@ def admin_dashboard(request):
     # Get pending Special Circumstance forms
     pending_special_forms = SpecialCircumstanceForm.objects.filter(status='pending').select_related('user').order_by('-submitted_at')
     
+    # Get organizational units
+    organizations = OrganizationalUnit.objects.all()
+    
+    # Get approvers
+    approver_assignments = UserOrganizationAssignment.objects.filter(
+        Q(is_approver=True) | Q(is_organizational_approver=True)
+    ).select_related('user', 'organizational_unit')
+    
     # Prepare admin user data
     admin_user = {
         "name": current_user.name,
@@ -151,7 +162,9 @@ def admin_dashboard(request):
         "users": users,
         "admin_user": admin_user,
         "pending_rce_forms": pending_rce_forms,
-        "pending_special_forms": pending_special_forms
+        "pending_special_forms": pending_special_forms,
+        "organizations": organizations,
+        "approver_assignments": approver_assignments
     }
     
     return render(request, "ums/admin.html", context)
@@ -201,16 +214,19 @@ def callback(request):
         user_id = user_data.get("id", None)
         user_email = user_data.get("mail", None) or user_data.get("userPrincipalName", None)
 
-        if not user_id or not user_email:
+        if not user_email or not user_id:
             messages.error(request, "Your Microsoft account is missing an email. Contact support.")
             return redirect("ums-login")
+
+        # if not(user_email.endswith("@uh.edu") or user_email.endswith("@cougarnet.uh.edu")):
+        #     messages.error(request, "Access restricted to Cougar ID's")
+        #     return redirect("ums-login")
 
         # Find or create a user in the database
         user, created = Users.objects.get_or_create(
             id=user_id,
             defaults={
                 "name": user_data.get("displayName", ""),
-                "email": user_email,
                 "status": "Active",
             }
         )
@@ -254,29 +270,49 @@ def logout(request):
 
 def submit_rce_form(request):
     if request.method == 'POST':
+        # Get organizational unit
+        org_unit_id = request.POST.get('organizational_unit')
+        org_unit = None
+        if org_unit_id:
+            org_unit = OrganizationalUnit.objects.get(id=org_unit_id)
+            
         RCEForm.objects.create(
             user_id=request.session['user_id'],
             exam_date=request.POST['exam_date'],
             semester=request.POST['semester'],
             comments=request.POST.get('comments', ''),
+            organizational_unit=org_unit,
             status='pending'  # Set initial status as pending
         )
         messages.success(request, "RCE request submitted successfully! It will be reviewed by an administrator.")
         return redirect('user')
-    return render(request, 'forms/rce_form.html')
+    
+    # Get organizations for form selection
+    organizations = OrganizationalUnit.objects.all()
+    return render(request, 'forms/rce_form.html', {"organizations": organizations})
 
 def submit_special_form(request):
     if request.method == 'POST':
+        # Get organizational unit
+        org_unit_id = request.POST.get('organizational_unit')
+        org_unit = None
+        if org_unit_id:
+            org_unit = OrganizationalUnit.objects.get(id=org_unit_id)
+            
         SpecialCircumstanceForm.objects.create(
             user_id=request.session['user_id'],
             degree=request.POST['degree'],
             graduation_date=request.POST['graduation_date'],
             reason=request.POST['reason'],
-            special_request_type=request.POST['special_request_type']
+            special_request_type=request.POST['special_request_type'],
+            organizational_unit=org_unit
         )
         messages.success(request, "Special Circumstance form submitted successfully!")
         return redirect('user')
-    return render(request, 'forms/special_form.html')
+        
+    # Get organizations for form selection
+    organizations = OrganizationalUnit.objects.all()
+    return render(request, 'forms/special_form.html', {"organizations": organizations})
 
 def generate_decision_document(form, decision, admin_user):
     """
@@ -342,6 +378,42 @@ def generate_decision_document(form, decision, admin_user):
 def review_rce_form(request, form_id):
     form = get_object_or_404(RCEForm, id=form_id)
     
+    # Check if user has permission to review this form
+    user = Users.objects.get(id=request.session['user_id'])
+    can_review = True
+    
+    # If form has organizational unit, check permissions
+    if form.organizational_unit:
+        # Get all user's organization assignments
+        user_assignments = UserOrganizationAssignment.objects.filter(user=user)
+        
+        # Check if user is an organizational approver in any relevant unit
+        is_org_approver = user_assignments.filter(
+            is_organizational_approver=True
+        ).exists()
+        
+        # Check if user is a direct approver for the form's unit
+        is_unit_approver = user_assignments.filter(
+            organizational_unit=form.organizational_unit,
+            is_approver=True
+        ).exists()
+        
+        # Check if user is an approver for any ancestor unit
+        ancestor_units = []
+        if hasattr(form.organizational_unit, 'get_ancestors'):
+            ancestor_units = form.organizational_unit.get_ancestors()
+            
+        is_ancestor_approver = user_assignments.filter(
+            organizational_unit__in=ancestor_units,
+            is_approver=True
+        ).exists()
+        
+        can_review = is_org_approver or is_unit_approver or is_ancestor_approver or user.role.lower() == 'admin'
+    
+    if not can_review and user.role.lower() != 'admin':
+        messages.error(request, "You don't have permission to review this form")
+        return redirect('admin_dashboard')
+    
     if request.method == 'POST':
         print("POST data:", request.POST)  # Debug print
         action = request.POST.get('action')
@@ -363,6 +435,17 @@ def review_rce_form(request, form_id):
                 admin_user = Users.objects.get(id=request.session['user_id'])
                 document = generate_decision_document(form, 'Pass', admin_user)
                 
+                # Create document approval with organizational context
+                if form.organizational_unit:
+                    DocumentApproval.objects.create(
+                        document=document,
+                        approver=admin_user,
+                        action="Approved",
+                        comments=f"RCE Form approved by {admin_user.name}",
+                        organizational_unit=form.organizational_unit,
+                        is_org_level_approval=is_org_approver if 'is_org_approver' in locals() else False
+                    )
+                
             elif action == 'deny':
                 form.status = 'denied'
                 form.decision = 'Fail'  # Always set to Fail when denied
@@ -371,6 +454,17 @@ def review_rce_form(request, form_id):
                 # Generate decision document
                 admin_user = Users.objects.get(id=request.session['user_id'])
                 document = generate_decision_document(form, 'Fail', admin_user)
+                
+                # Create document approval with organizational context
+                if form.organizational_unit:
+                    DocumentApproval.objects.create(
+                        document=document,
+                        approver=admin_user,
+                        action="Denied",
+                        comments=f"RCE Form denied by {admin_user.name}",
+                        organizational_unit=form.organizational_unit,
+                        is_org_level_approval=is_org_approver if 'is_org_approver' in locals() else False
+                    )
             
             form.save()
             print(f"Form saved with status: {form.status}, decision: {form.decision}")  # Debug print
@@ -380,11 +474,62 @@ def review_rce_form(request, form_id):
             messages.error(request, f'Error processing request: {str(e)}')
             return render(request, 'ums/review_rce.html', {'form': form})
     
-    return render(request, 'ums/review_rce.html', {'form': form})
+    # Get organizational context for template
+    org_context = None
+    if form.organizational_unit:
+        ancestors = []
+        if hasattr(form.organizational_unit, 'get_ancestors'):
+            ancestors = form.organizational_unit.get_ancestors()
+            
+        org_context = {
+            'unit': form.organizational_unit,
+            'ancestors': ancestors
+        }
+    
+    return render(request, 'ums/review_rce.html', {
+        'form': form,
+        'org_context': org_context
+    })
 
 @role_required(['Admin'])
 def review_special_form(request, form_id):
     form = get_object_or_404(SpecialCircumstanceForm, id=form_id)
+    
+    # Check if user has permission to review this form
+    user = Users.objects.get(id=request.session['user_id'])
+    can_review = True
+    
+    # If form has organizational unit, check permissions
+    if form.organizational_unit:
+        # Get all user's organization assignments
+        user_assignments = UserOrganizationAssignment.objects.filter(user=user)
+        
+        # Check if user is an organizational approver in any relevant unit
+        is_org_approver = user_assignments.filter(
+            is_organizational_approver=True
+        ).exists()
+        
+        # Check if user is a direct approver for the form's unit
+        is_unit_approver = user_assignments.filter(
+            organizational_unit=form.organizational_unit,
+            is_approver=True
+        ).exists()
+        
+        # Check if user is an approver for any ancestor unit
+        ancestor_units = []
+        if hasattr(form.organizational_unit, 'get_ancestors'):
+            ancestor_units = form.organizational_unit.get_ancestors()
+            
+        is_ancestor_approver = user_assignments.filter(
+            organizational_unit__in=ancestor_units,
+            is_approver=True
+        ).exists()
+        
+        can_review = is_org_approver or is_unit_approver or is_ancestor_approver or user.role.lower() == 'admin'
+    
+    if not can_review and user.role.lower() != 'admin':
+        messages.error(request, "You don't have permission to review this form")
+        return redirect('admin_dashboard')
     
     if request.method == 'POST':
         print("POST data:", request.POST)  # Debug print
@@ -407,6 +552,17 @@ def review_special_form(request, form_id):
                 admin_user = Users.objects.get(id=request.session['user_id'])
                 document = generate_decision_document(form, 'Pass', admin_user)
                 
+                # Create document approval with organizational context
+                if form.organizational_unit:
+                    DocumentApproval.objects.create(
+                        document=document,
+                        approver=admin_user,
+                        action="Approved",
+                        comments=f"Special Circumstance Form approved by {admin_user.name}",
+                        organizational_unit=form.organizational_unit,
+                        is_org_level_approval=is_org_approver if 'is_org_approver' in locals() else False
+                    )
+                
             elif action == 'deny':
                 form.status = 'denied'
                 form.decision = 'Fail'  # Always set to Fail when denied
@@ -415,6 +571,17 @@ def review_special_form(request, form_id):
                 # Generate decision document
                 admin_user = Users.objects.get(id=request.session['user_id'])
                 document = generate_decision_document(form, 'Fail', admin_user)
+                
+                # Create document approval with organizational context
+                if form.organizational_unit:
+                    DocumentApproval.objects.create(
+                        document=document,
+                        approver=admin_user,
+                        action="Denied",
+                        comments=f"Special Circumstance Form denied by {admin_user.name}",
+                        organizational_unit=form.organizational_unit,
+                        is_org_level_approval=is_org_approver if 'is_org_approver' in locals() else False
+                    )
             
             form.save()
             print(f"Form saved with status: {form.status}, decision: {form.decision}")  # Debug print
@@ -424,7 +591,22 @@ def review_special_form(request, form_id):
             messages.error(request, f'Error processing request: {str(e)}')
             return render(request, 'ums/review_special.html', {'form': form})
     
-    return render(request, 'ums/review_special.html', {'form': form})
+    # Get organizational context for template
+    org_context = None
+    if form.organizational_unit:
+        ancestors = []
+        if hasattr(form.organizational_unit, 'get_ancestors'):
+            ancestors = form.organizational_unit.get_ancestors()
+            
+        org_context = {
+            'unit': form.organizational_unit,
+            'ancestors': ancestors
+        }
+    
+    return render(request, 'ums/review_special.html', {
+        'form': form,
+        'org_context': org_context
+    })
 
 def user_requests(request):
     if "user_id" not in request.session:
@@ -477,4 +659,309 @@ def upload_signature(request):
             return redirect('upload_signature')
     
     return render(request, 'ums/upload_signature.html', {'admin_signature': admin_signature})
+
+# Organization Management Views
+@role_required(["Admin"])
+def organization_list(request):
+    """View to list all organizational units"""
+    organizations = OrganizationalUnit.objects.all()
+    return render(request, "ums/organization_list.html", {"organizations": organizations})
+
+@role_required(["Admin"])
+def organization_create(request):
+    """View to create a new organizational unit"""
+    if request.method == "POST":
+        name = request.POST.get("name")
+        description = request.POST.get("description")
+        parent_id = request.POST.get("parent")
+        
+        if not name:
+            messages.error(request, "Organization name is required")
+            return redirect("organization_create")
+        
+        try:
+            parent = None
+            if parent_id:
+                parent = OrganizationalUnit.objects.get(id=parent_id)
+                
+            OrganizationalUnit.objects.create(
+                name=name,
+                description=description,
+                parent=parent
+            )
+            messages.success(request, f"Organization '{name}' created successfully")
+            return redirect("organization_list")
+        except Exception as e:
+            messages.error(request, f"Error creating organization: {str(e)}")
+    
+    # Get all organizations for parent selection
+    organizations = OrganizationalUnit.objects.all()
+    return render(request, "ums/organization_form.html", {"organizations": organizations})
+
+@role_required(["Admin"])
+def organization_edit(request, org_id):
+    """View to edit an organizational unit"""
+    organization = get_object_or_404(OrganizationalUnit, id=org_id)
+    
+    if request.method == "POST":
+        name = request.POST.get("name")
+        description = request.POST.get("description")
+        parent_id = request.POST.get("parent")
+        
+        if not name:
+            messages.error(request, "Organization name is required")
+            return redirect("organization_edit", org_id=org_id)
+        
+        try:
+            # Update the organization
+            organization.name = name
+            organization.description = description
+            
+            # Handle parent organization
+            if parent_id and parent_id != str(organization.id):  # Prevent self-parenting
+                organization.parent = OrganizationalUnit.objects.get(id=parent_id)
+            elif not parent_id:
+                organization.parent = None
+                
+            organization.save()
+            messages.success(request, f"Organization '{name}' updated successfully")
+            return redirect("organization_list")
+        except Exception as e:
+            messages.error(request, f"Error updating organization: {str(e)}")
+    
+    # Get all organizations for parent selection, excluding self and descendants
+    descendants = []
+    if hasattr(organization, 'get_descendants'):
+        descendants = organization.get_descendants(include_self=True)
+    potential_parents = OrganizationalUnit.objects.exclude(
+        id__in=[d.id for d in descendants] if descendants else [organization.id]
+    )
+    
+    return render(request, "ums/organization_form.html", {
+        "organization": organization,
+        "organizations": potential_parents,
+        "is_edit": True
+    })
+
+@role_required(["Admin"])
+def organization_view(request, org_id):
+    """View details of a specific organizational unit"""
+    organization = get_object_or_404(OrganizationalUnit, id=org_id)
+    
+    # Get users assigned to this organization
+    assigned_users = UserOrganizationAssignment.objects.filter(
+        organizational_unit=organization
+    ).select_related('user')
+    
+    # Get child organizations
+    children = []
+    if hasattr(organization, 'get_children'):
+        children = organization.get_children()
+    
+    # Get parent organization path
+    ancestors = []
+    if hasattr(organization, 'get_ancestors'):
+        ancestors = organization.get_ancestors()
+    
+    context = {
+        "organization": organization,
+        "assigned_users": assigned_users,
+        "children": children,
+        "ancestors": ancestors,
+    }
+    
+    return render(request, "ums/organization_detail.html", context)
+
+@role_required(["Admin"])
+def organization_hierarchy(request):
+    """View the full organizational hierarchy"""
+    # Get all root nodes (organizations without parents)
+    root_nodes = OrganizationalUnit.objects.filter(parent=None)
+    
+    # For each root node, get the full tree
+    trees = []
+    for root in root_nodes:
+        tree = []
+        if hasattr(root, 'get_descendants'):
+            tree = root.get_descendants(include_self=True)
+        trees.append({
+            'root': root,
+            'tree': tree
+        })
+    
+    return render(request, "ums/organization_hierarchy.html", {"trees": trees})
+
+# User Assignment Views
+@role_required(["Admin"])
+def assign_user_to_org(request):
+    """View to assign users to organizational units"""
+    if request.method == "POST":
+        user_id = request.POST.get("user_id")
+        org_id = request.POST.get("organization_id")
+        is_approver = request.POST.get("is_approver") == "on"
+        is_org_approver = request.POST.get("is_organizational_approver") == "on"
+        
+        if not user_id or not org_id:
+            messages.error(request, "Both user and organization must be selected")
+            return redirect("assign_user_to_org")
+        
+        try:
+            user = Users.objects.get(id=user_id)
+            organization = OrganizationalUnit.objects.get(id=org_id)
+            
+            # Check if assignment already exists
+            assignment, created = UserOrganizationAssignment.objects.get_or_create(
+                user=user,
+                organizational_unit=organization,
+                defaults={
+                    'is_approver': is_approver,
+                    'is_organizational_approver': is_org_approver
+                }
+            )
+            
+            if not created:
+                # Update existing assignment
+                assignment.is_approver = is_approver
+                assignment.is_organizational_approver = is_org_approver
+                assignment.save()
+                messages.success(request, f"Updated {user.name}'s assignment to {organization.name}")
+            else:
+                messages.success(request, f"Assigned {user.name} to {organization.name}")
+                
+            return redirect("organization_users", org_id=org_id)
+        
+        except Exception as e:
+            messages.error(request, f"Error assigning user: {str(e)}")
+    
+    users = Users.objects.filter(status="Active").order_by("name")
+    organizations = OrganizationalUnit.objects.all().order_by("name")
+    
+    return render(request, "ums/assign_user_form.html", {
+        "users": users,
+        "organizations": organizations
+    })
+
+@role_required(["Admin"])
+def user_organizations(request, user_id):
+    """View to manage all organizations for a specific user"""
+    user = get_object_or_404(Users, id=user_id)
+    
+    # Get all assignments for this user
+    assignments = UserOrganizationAssignment.objects.filter(
+        user=user
+    ).select_related('organizational_unit')
+    
+    # If removing an assignment
+    if request.method == "POST" and request.POST.get("action") == "remove":
+        assignment_id = request.POST.get("assignment_id")
+        try:
+            assignment = UserOrganizationAssignment.objects.get(id=assignment_id, user=user)
+            org_name = assignment.organizational_unit.name
+            assignment.delete()
+            messages.success(request, f"Removed {user.name} from {org_name}")
+        except Exception as e:
+            messages.error(request, f"Error removing assignment: {str(e)}")
+        
+        return redirect("user_organizations", user_id=user_id)
+    
+    # Get available organizations (not already assigned)
+    assigned_org_ids = assignments.values_list('organizational_unit_id', flat=True)
+    available_organizations = OrganizationalUnit.objects.exclude(
+        id__in=assigned_org_ids
+    ).order_by("name")
+    
+    return render(request, "ums/user_organizations.html", {
+        "user": user,
+        "assignments": assignments,
+        "available_organizations": available_organizations
+    })
+
+@role_required(["Admin"])
+def organization_users(request, org_id):
+    """View to manage all users in a specific organization"""
+    organization = get_object_or_404(OrganizationalUnit, id=org_id)
+    
+    # Get all user assignments for this organization
+    assignments = UserOrganizationAssignment.objects.filter(
+        organizational_unit=organization
+    ).select_related('user')
+    
+    # If removing a user
+    if request.method == "POST" and request.POST.get("action") == "remove":
+        assignment_id = request.POST.get("assignment_id")
+        try:
+            assignment = UserOrganizationAssignment.objects.get(id=assignment_id, organizational_unit=organization)
+            user_name = assignment.user.name
+            assignment.delete()
+            messages.success(request, f"Removed {user_name} from {organization.name}")
+        except Exception as e:
+            messages.error(request, f"Error removing user: {str(e)}")
+        
+        return redirect("organization_users", org_id=org_id)
+    
+    # Get available users (not already assigned to this organization)
+    assigned_user_ids = assignments.values_list('user_id', flat=True)
+    available_users = Users.objects.filter(
+        status="Active"
+    ).exclude(
+        id__in=assigned_user_ids
+    ).order_by("name")
+    
+    return render(request, "ums/organization_users.html", {
+        "organization": organization,
+        "assignments": assignments,
+        "available_users": available_users
+    })
+
+# Approver Management Views
+@role_required(["Admin"])
+def approver_list(request):
+    """View to list all approvers across the system"""
+    # Get all user-organization assignments where user is an approver
+    approver_assignments = UserOrganizationAssignment.objects.filter(
+        Q(is_approver=True) | Q(is_organizational_approver=True)
+    ).select_related('user', 'organizational_unit')
+    
+    # Group by user
+    approvers_by_user = {}
+    for assignment in approver_assignments:
+        if assignment.user.id not in approvers_by_user:
+            approvers_by_user[assignment.user.id] = {
+                'user': assignment.user,
+                'assignments': []
+            }
+        approvers_by_user[assignment.user.id]['assignments'].append(assignment)
+    
+    return render(request, "ums/approver_list.html", {
+        "approvers": approvers_by_user.values()
+    })
+
+@role_required(["Admin"])
+def manage_approver(request, user_id, org_id):
+    """View to manage approver status for a user in an organization"""
+    user = get_object_or_404(Users, id=user_id)
+    organization = get_object_or_404(OrganizationalUnit, id=org_id)
+    
+    try:
+        assignment = UserOrganizationAssignment.objects.get(user=user, organizational_unit=organization)
+    except UserOrganizationAssignment.DoesNotExist:
+        messages.error(request, f"{user.name} is not assigned to {organization.name}")
+        return redirect("organization_users", org_id=org_id)
+    
+    if request.method == "POST":
+        is_approver = request.POST.get("is_approver") == "on"
+        is_org_approver = request.POST.get("is_organizational_approver") == "on"
+        
+        assignment.is_approver = is_approver
+        assignment.is_organizational_approver = is_org_approver
+        assignment.save()
+        
+        messages.success(request, f"Updated approver status for {user.name} in {organization.name}")
+        return redirect("organization_users", org_id=org_id)
+    
+    return render(request, "ums/manage_approver.html", {
+        "user": user,
+        "organization": organization,
+        "assignment": assignment
+    })
 

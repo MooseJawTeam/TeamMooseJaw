@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'mptt',
     'ums'
 ]
 
@@ -89,7 +90,7 @@ WSGI_APPLICATION = 'moosejawums.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
+# Using SQLite for Dev / testing
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.sqlite3',
@@ -97,7 +98,7 @@ WSGI_APPLICATION = 'moosejawums.wsgi.application'
 #     }
 # }
 
-# Original MySQL configuration
+# Using live database
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -133,7 +134,7 @@ env = environ.Env()
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
 MICROSOFT_AUTH = {
-    'TENANT_ID': env('TENANT_ID', default="common"),
+    'TENANT_ID': env('TENANT_ID',default="common"),
     'CLIENT_ID': env('CLIENT_ID'),
     'CLIENT_SECRET': env('CLIENT_SECRET'),
     'REDIRECT_URI': "http://localhost:8000/auth/callback/",
