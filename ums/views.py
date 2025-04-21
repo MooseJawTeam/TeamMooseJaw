@@ -211,17 +211,16 @@ def callback(request):
         headers = {"Authorization": f'Bearer {token_response["access_token"]}'}
         user_data = requests.get("https://graph.microsoft.com/v1.0/me", headers=headers).json()
 
-        user_id = user_data.get("id")
-        user_email = user_data.get("mail") or user_data.get("userPrincipalName")
-        user_name = user_data.get("displayName", "Unknown User")
+        user_id = user_data.get("id", None)
+        user_email = user_data.get("mail", None) or user_data.get("userPrincipalName", None)
 
         if not user_email or not user_id:
             messages.error(request, "Your Microsoft account is missing an email. Contact support.")
             return redirect("ums-login")
 
-        if not(user_email.endswith("@uh.edu") or user_email.endswith("@cougarnet.uh.edu")):
-            messages.error(request, "Access restricted to Cougar ID's")
-            return redirect("ums-login")
+        # if not(user_email.endswith("@uh.edu") or user_email.endswith("@cougarnet.uh.edu")):
+        #     messages.error(request, "Access restricted to Cougar ID's")
+        #     return redirect("ums-login")
 
         # Find or create a user in the database
         user, created = Users.objects.get_or_create(
