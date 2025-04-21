@@ -134,11 +134,11 @@ env = environ.Env()
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
 MICROSOFT_AUTH = {
-    'TENANT_ID': env('TENANT_ID'),
+    'TENANT_ID': env('TENANT_ID',default="common"),
     'CLIENT_ID': env('CLIENT_ID'),
     'CLIENT_SECRET': env('CLIENT_SECRET'),
     'REDIRECT_URI': "http://localhost:8000/auth/callback/",
-    'AUTHORITY': f"https://login.microsoftonline.com/{env('TENANT_ID')}",
+    'AUTHORITY': "https://login.microsoftonline.com/common",
     'SCOPE': ["User.Read"]
 }
 
