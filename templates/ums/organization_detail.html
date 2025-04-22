@@ -1,0 +1,153 @@
+{% extends 'ums/base.html' %}
+
+{% block title %}{{ organization.name }} - Organization Details{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>{{ organization.name }}</h2>
+                <div>
+                    <a href="{% url 'organization_edit' organization.id %}" class="btn btn-primary">
+                        <i class="fas fa-edit"></i> Edit Organization
+                    </a>
+                    <a href="{% url 'organization_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <!-- Organization Details -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5>Organization Information</h5>
+                    <table class="table">
+                        <tr>
+                            <th>Name</th>
+                            <td>{{ organization.name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Description</th>
+                            <td>{{ organization.description|default:"No description provided" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Parent Organization</th>
+                            <td>
+                                {% if organization.parent %}
+                                    <a href="{% url 'organization_view' organization.parent.id %}">
+                                        {{ organization.parent.name }}
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted">None (Root Organization)</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h5>Organization Hierarchy</h5>
+                    {% if ancestors %}
+                        <div class="mb-3">
+                            <h6>Parent Organizations:</h6>
+                            <ul class="list-group">
+                                {% for ancestor in ancestors %}
+                                    <li class="list-group-item">
+                                        <a href="{% url 'organization_view' ancestor.id %}">
+                                            {{ ancestor.name }}
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                    {% if children %}
+                        <div>
+                            <h6>Child Organizations:</h6>
+                            <ul class="list-group">
+                                {% for child in children %}
+                                    <li class="list-group-item">
+                                        <a href="{% url 'organization_view' child.id %}">
+                                            {{ child.name }}
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Assigned Users -->
+            <div class="row">
+                <div class="col-12">
+                    <h5>Assigned Users</h5>
+                    {% if assigned_users %}
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Is Approver</th>
+                                        <th>Is Org Approver</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for assignment in assigned_users %}
+                                        <tr>
+                                            <td>{{ assignment.user.name }}</td>
+                                            <td>{{ assignment.user.email }}</td>
+                                            <td>{{ assignment.user.role }}</td>
+                                            <td>
+                                                <span class="badge {% if assignment.is_approver %}bg-success{% else %}bg-secondary{% endif %}">
+                                                    {{ assignment.is_approver|yesno:"Yes,No" }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge {% if assignment.is_organizational_approver %}bg-success{% else %}bg-secondary{% endif %}">
+                                                    {{ assignment.is_organizational_approver|yesno:"Yes,No" }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'manage_approver' assignment.user.id organization.id %}" 
+                                                   class="btn btn-sm btn-info">
+                                                    <i class="fas fa-user-shield"></i> Manage Approver
+                                                </a>
+                                                <form method="post" action="{% url 'organization_users' organization.id %}" 
+                                                      class="d-inline">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="action" value="remove">
+                                                    <input type="hidden" name="assignment_id" value="{{ assignment.id }}">
+                                                    <button type="submit" class="btn btn-sm btn-danger" 
+                                                            onclick="return confirm('Are you sure you want to remove this user?')">
+                                                        <i class="fas fa-user-minus"></i> Remove
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            No users are currently assigned to this organization.
+                        </div>
+                    {% endif %}
+                    
+                    <div class="mt-3">
+                        <a href="{% url 'assign_user_to_org' %}?organization_id={{ organization.id }}" 
+                           class="btn btn-primary">
+                            <i class="fas fa-user-plus"></i> Assign User
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

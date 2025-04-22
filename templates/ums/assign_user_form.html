@@ -1,0 +1,89 @@
+{% extends 'ums/base.html' %}
+
+{% block title %}Assign User to Organization{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>Assign User to Organization</h2>
+                <a href="{% url 'organization_list' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Organizations
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{% url 'assign_user_to_org' %}">
+                {% csrf_token %}
+                
+                <!-- Hidden field for organization_id if provided -->
+                {% if request.GET.organization_id %}
+                    <input type="hidden" name="organization_id" value="{{ request.GET.organization_id }}">
+                {% endif %}
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="user_id" class="form-label">Select User</label>
+                        <select class="form-select" id="user_id" name="user_id" required>
+                            <option value="">Choose a user...</option>
+                            {% for user in users %}
+                                <option value="{{ user.id }}">{{ user.name }} ({{ user.email }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    {% if not request.GET.organization_id %}
+                    <div class="col-md-6">
+                        <label for="organization_id" class="form-label">Select Organization</label>
+                        <select class="form-select" id="organization_id" name="organization_id" required>
+                            <option value="">Choose an organization...</option>
+                            {% for org in organizations %}
+                                <option value="{{ org.id }}">{{ org.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="is_approver" name="is_approver">
+                            <label class="form-check-label" for="is_approver">
+                                Make this user an approver for this organization
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="is_organizational_approver" name="is_organizational_approver">
+                            <label class="form-check-label" for="is_organizational_approver">
+                                Make this user an organizational approver
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-user-plus"></i> Assign User
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% if messages %}
+<div class="container mt-3">
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %} 
