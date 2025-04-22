@@ -34,6 +34,7 @@ from django.utils import timezone
 from .pdf_utils import generate_pdf
 from django.template.loader import render_to_string
 from .forms import TermWithdrawalFormForm
+from django.http import Http404
 
 
 
@@ -144,10 +145,8 @@ def admin_dashboard(request):
     
     # Get all users except the current admin
     users = Users.objects.exclude(id=request.session["user_id"]).order_by("name")
-    ###
 
-
-# Fetch all active delegations
+    # Fetch all active delegations
     now = timezone.now()
     active_delegations = ApprovalDelegation.objects.filter(active=True,start_date__lte=now).filter(Q(end_date__isnull=True) | Q(end_date__gte=now)).select_related('delegator', 'delegatee')
 
@@ -157,14 +156,17 @@ def admin_dashboard(request):
     assignments = UserOrganizationAssignment.objects.filter(user_id__in=user_ids)
     approvable_units = assignments.filter(is_approver=True).values_list('organizational_unit_id', flat=True)
 
-    # Get pending RCE forms
+    # Get all pending forms
     pending_rce_forms = RCEForm.objects.filter(status='pending').select_related('user').order_by('-submitted_at')
-
-    # Get pending Special Circumstance forms
     pending_special_forms = SpecialCircumstanceForm.objects.filter(status='pending').select_related('user').order_by('-submitted_at')
-
-    # Get pending Term Withdrawal forms
     pending_term_withdrawals = TermWithdrawalForm.objects.filter(status='pending').select_related('user').order_by('-submitted_at')
+    pending_veteran_forms = VeteranCertificationForm.objects.filter(status='pending').select_related('user').order_by('-submitted_at')
+
+    # Get all completed forms
+    completed_rce_forms = RCEForm.objects.exclude(status='pending').select_related('user').order_by('-submitted_at')
+    completed_special_forms = SpecialCircumstanceForm.objects.exclude(status='pending').select_related('user').order_by('-submitted_at')
+    completed_term_withdrawals = TermWithdrawalForm.objects.exclude(status='pending').select_related('user').order_by('-submitted_at')
+    completed_veteran_forms = VeteranCertificationForm.objects.exclude(status='pending').select_related('user').order_by('-submitted_at')
 
     # Get organizational units
     organizations = OrganizationalUnit.objects.all()
@@ -226,12 +228,35 @@ def admin_dashboard(request):
         "pending_rce_forms": pending_rce_forms,
         "pending_special_forms": pending_special_forms,
         "pending_term_withdrawals": pending_term_withdrawals,
+        "pending_veteran_forms": pending_veteran_forms,
+        "completed_rce_forms": completed_rce_forms,
+        "completed_special_forms": completed_special_forms,
+        "completed_term_withdrawals": completed_term_withdrawals,
+        "completed_veteran_forms": completed_veteran_forms,
         "organizations": organizations,
         "approver_assignments": approver_assignments, 
         "active_delegations": active_delegations,
     }
     
     return render(request, "ums/admin.html", context)
+
+@role_required(["Admin"])
+def all_requests(request):
+    """View to show all requests across all users"""
+    # Get all forms
+    rce_forms = RCEForm.objects.all().select_related('user').order_by('-submitted_at')
+    special_forms = SpecialCircumstanceForm.objects.all().select_related('user').order_by('-submitted_at')
+    term_withdrawals = TermWithdrawalForm.objects.all().select_related('user').order_by('-submitted_at')
+    veteran_forms = VeteranCertificationForm.objects.all().select_related('user').order_by('-submitted_at')
+
+    context = {
+        'rce_forms': rce_forms,
+        'special_forms': special_forms,
+        'term_withdrawals': term_withdrawals,
+        'veteran_forms': veteran_forms,
+    }
+    
+    return render(request, 'ums/all_requests.html', context)
 
 def microsoft_login(request):
     msal_app = msal.ConfidentialClientApplication(
@@ -393,7 +418,7 @@ def generate_decision_document(form, decision, admin_user):
     context = {
         'document_title': f"{form.__class__.__name__} Decision",
         'document_id': str(uuid.uuid4()),
-        'generation_date': datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
+        'generation_date': timezone.now().strftime("%Y-%m-%d %H:%M:%S"),
         'username': form.user.name,
         'useremail': form.user.email,
         'custom_text': form.reason if hasattr(form, 'reason') else form.comments,
@@ -404,7 +429,7 @@ def generate_decision_document(form, decision, admin_user):
     
     # Create document template if it doesn't exist
     template, created = DocumentTemplate.objects.get_or_create(
-        name=template_name,  # Use the actual template name instead of constructing one
+        name=template_name,
         defaults={
             'description': f"Template for {decision} decisions",
             'html_content': render_to_string(f'pdf_templates/{template_name}', context)
@@ -459,7 +484,6 @@ def review_rce_form(request, form_id):
     user_ids = [user.id] + [u.id for u in delegators]
 
     # Determine if the user is acting as a delegate
-  
 
     #pull all assignments for the user + any delegators
     #user_assignments = UserOrganizationAssignment.objects.filter(user_id__in=user_ids)
@@ -1086,8 +1110,9 @@ def delegate_approval(request):
         end_date = request.POST.get("end_date")
 
         try:
-            start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
-            end_date = datetime.strptime(end_date, "%Y-%m-%d").date() if end_date else None
+            # Convert to timezone-aware datetime
+            start_date = timezone.make_aware(datetime.strptime(start_date, "%Y-%m-%d"))
+            end_date = timezone.make_aware(datetime.strptime(end_date, "%Y-%m-%d")) if end_date else None
 
             ApprovalDelegation.objects.create(
                 delegator_id=request.session['user_id'],
@@ -1199,7 +1224,7 @@ def review_term_withdrawal(request, form_id):
                 context = {
                     'document_title': 'Term Withdrawal Decision',
                     'document_id': str(uuid.uuid4()),
-                    'generation_date': datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
+                    'generation_date': timezone.now().strftime("%Y-%m-%d %H:%M:%S"),
                     'username': form.user.name,
                     'useremail': form.user.email,
                     'custom_text': f"Term: {form.withdrawal_term} {form.withdrawal_year}",
@@ -1252,7 +1277,7 @@ def review_term_withdrawal(request, form_id):
                 context = {
                     'document_title': 'Term Withdrawal Decision',
                     'document_id': str(uuid.uuid4()),
-                    'generation_date': datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
+                    'generation_date': timezone.now().strftime("%Y-%m-%d %H:%M:%S"),
                     'username': form.user.name,
                     'useremail': form.user.email,
                     'custom_text': f"Term: {form.withdrawal_term} {form.withdrawal_year}",
@@ -1340,3 +1365,59 @@ def veteran_certification(request):
     # Get organizations for form selection
     organizations = OrganizationalUnit.objects.all()
     return render(request, 'forms/veteran_certification.html', {"organizations": organizations})
+
+@role_required(['Admin'])
+def view_special_circumstance_form(request, form_id):
+    """View to display a special circumstance form"""
+    form = get_object_or_404(SpecialCircumstanceForm, id=form_id)
+    
+    # Get organizational context for template
+    org_context = None
+    if form.organizational_unit:
+        ancestors = []
+        if hasattr(form.organizational_unit, 'get_ancestors'):
+            ancestors = form.organizational_unit.get_ancestors()
+            
+        org_context = {
+            'unit': form.organizational_unit,
+            'ancestors': ancestors
+        }
+    
+    return render(request, 'ums/view_special_circumstance.html', {
+        'form': form,
+        'org_context': org_context
+    })
+
+@role_required(['Admin'])
+def view_form(request, form_type, form_id):
+    """Generic view function for viewing any form type"""
+    form_models = {
+        'special_circumstance': SpecialCircumstanceForm,
+        'term_withdrawal': TermWithdrawalForm,
+        'rce': RCEForm,
+        'veteran': VeteranCertificationForm
+    }
+    
+    if form_type not in form_models:
+        raise Http404("Form type not found")
+    
+    form = get_object_or_404(form_models[form_type], id=form_id)
+    
+    # Get organizational context for template
+    org_context = None
+    if hasattr(form, 'organizational_unit') and form.organizational_unit:
+        ancestors = []
+        if hasattr(form.organizational_unit, 'get_ancestors'):
+            ancestors = form.organizational_unit.get_ancestors()
+            
+        org_context = {
+            'unit': form.organizational_unit,
+            'ancestors': ancestors
+        }
+    
+    template_name = f'ums/view_{form_type}_form.html'
+    return render(request, template_name, {
+        'form': form,
+        'org_context': org_context,
+        'form_type': form_type
+    })

@@ -35,6 +35,7 @@ urlpatterns = [
     # 🔹 Form Review Routes
     path("review/rce/<int:form_id>/", views.review_rce_form, name="review_rce"),
     path("review/special/<int:form_id>/", views.review_special_form, name="review_special"),
+    path("view/<str:form_type>/<int:form_id>/", views.view_form, name="view_form"),
     path("review/term-withdrawal/<int:form_id>/", views.review_term_withdrawal, name="review_term_withdrawal"),
 
     # 🔹 User Requests Route
@@ -61,5 +62,8 @@ urlpatterns = [
 
     # 🔹 Delegation Management
     path("delegate/", delegate_approval, name="delegate_approval"),
+    
+    # 🔹 All Requests View
+    path("admin/requests/", views.all_requests, name="all_requests"),
 ]
 

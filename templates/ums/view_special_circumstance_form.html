@@ -1,0 +1,79 @@
+{% extends 'ums/base.html' %}
+
+{% block title %}View Special Circumstance Form{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h2>Special Circumstance Form Details</h2>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5>User Information</h5>
+                    <p><strong>Name:</strong> {{ form.user.name }}</p>
+                    <p><strong>Email:</strong> {{ form.user.email }}</p>
+                </div>
+                <div class="col-md-6">
+                    <h5>Form Details</h5>
+                    <p><strong>Status:</strong> 
+                        <span class="badge {% if form.status == 'pending' %}bg-warning{% elif form.status == 'approved' %}bg-success{% else %}bg-danger{% endif %}">
+                            {{ form.status|title }}
+                        </span>
+                    </p>
+                    <p><strong>Submitted At:</strong> {{ form.submitted_at|date:"F j, Y, g:i a" }}</p>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h5>Form Information</h5>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <tr>
+                                <th>Degree</th>
+                                <td>{{ form.degree }}</td>
+                            </tr>
+                            <tr>
+                                <th>Graduation Date</th>
+                                <td>{{ form.graduation_date }}</td>
+                            </tr>
+                            <tr>
+                                <th>Special Request Type</th>
+                                <td>{{ form.special_request_type }}</td>
+                            </tr>
+                            <tr>
+                                <th>Reason</th>
+                                <td>{{ form.reason }}</td>
+                            </tr>
+                            {% if form.organizational_unit %}
+                            <tr>
+                                <th>Organizational Unit</th>
+                                <td>
+                                    {{ form.organizational_unit.name }}
+                                    {% if org_context.ancestors %}
+                                    <small class="text-muted">
+                                        (Part of: {% for ancestor in org_context.ancestors %}{{ ancestor.name }}{% if not forloop.last %}, {% endif %}{% endfor %})
+                                    </small>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endif %}
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+                    {% if form.status == 'pending' %}
+                    <a href="{% url 'review_special' form.id %}" class="btn btn-primary">Review Form</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
