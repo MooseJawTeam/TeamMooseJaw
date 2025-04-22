@@ -1,0 +1,139 @@
+{% extends "ums/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Student Request for Official Term Withdrawal</h2>
+    
+    <form method="post" id="withdrawalForm">
+        {% csrf_token %}
+        
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Student Information</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ form.myuh_id|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.phone_number|as_crispy_field }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ form.program_plan|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.academic_career|as_crispy_field }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Withdrawal Details</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ form.withdrawal_term|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.withdrawal_year|as_crispy_field }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Initial all that apply:</h5>
+                <div class="form-check mb-2">
+                    {{ form.financial_aid_acknowledged|as_crispy_field }}
+                    <label class="form-check-label">STUDENTS RECEIVING FINANCIAL AID — I understand implications for aid, scholarships, and SAP.</label>
+                </div>
+                <div class="form-check mb-2">
+                    {{ form.international_student_acknowledged|as_crispy_field }}
+                    <label class="form-check-label">INTERNATIONAL STUDENTS — I obtained authorization from ISSSO prior to withdrawal.</label>
+                </div>
+                <div class="form-check mb-2">
+                    {{ form.student_athlete_acknowledged|as_crispy_field }}
+                    <label class="form-check-label">STUDENT-ATHLETES — I cleared all holds and returned items, and met with Athletics departments.</label>
+                </div>
+                <div class="form-check mb-2">
+                    {{ form.veteran_acknowledged|as_crispy_field }}
+                    <label class="form-check-label">VETERANS — I understand the impact on GI Bill and the need to consult the Certifying Official.</label>
+                </div>
+                <div class="form-check mb-2">
+                    {{ form.graduate_student_acknowledged|as_crispy_field }}
+                    <label class="form-check-label">GRADUATE/PROFESSIONAL STUDENTS — I met my advisor and included required documentation.</label>
+                </div>
+                <div class="form-check mb-2">
+                    {{ form.doctoral_student_acknowledged|as_crispy_field }}
+                    <label class="form-check-label">DOCTORAL STUDENTS — I filed a leave of absence with the Office of Graduate and Professional Studies.</label>
+                </div>
+                <div class="form-check mb-2">
+                    {{ form.housing_acknowledged|as_crispy_field }}
+                    <label class="form-check-label">STUDENT HOUSING — I checked out and returned keys according to Housing policy.</label>
+                </div>
+                <div class="form-check mb-2">
+                    {{ form.dining_services_acknowledged|as_crispy_field }}
+                    <label class="form-check-label">DINING SERVICES — I will file a petition for unused meal plans if eligible.</label>
+                </div>
+                <div class="form-check mb-2">
+                    {{ form.parking_acknowledged|as_crispy_field }}
+                    <label class="form-check-label">PARKING — I will return my permit to Parking Services to request a credit.</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Final Acknowledgment</h5>
+                <div class="form-check mb-2">
+                    {{ form.final_acknowledgment|as_crispy_field }}
+                    <label class="form-check-label">I understand that a withdrawal from ALL classes may have academic and financial implications and I may owe an outstanding balance. This form will be effective on the date processed, and refunds will be based on that date.</label>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div id="signature-pad" class="border rounded p-2" style="height: 200px;">
+                            <canvas id="signature-canvas"></canvas>
+                        </div>
+                        <button type="button" class="btn btn-secondary mt-2" onclick="clearSignature()">Clear Signature</button>
+                        {{ form.signature_data|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.signature_date|as_crispy_field }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mb-4">
+            <button type="submit" class="btn btn-primary">Submit Withdrawal Request</button>
+        </div>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@2.3.2/dist/signature_pad.min.js"></script>
+<script>
+    var canvas = document.getElementById('signature-canvas');
+    var signaturePad = new SignaturePad(canvas, {
+        backgroundColor: 'rgba(255, 255, 255, 0)',
+        penColor: 'rgb(0, 0, 0)'
+    });
+
+    function clearSignature() {
+        signaturePad.clear();
+        document.getElementById('id_signature_data').value = '';
+    }
+
+    document.getElementById('withdrawalForm').addEventListener('submit', function(e) {
+        if (signaturePad.isEmpty()) {
+            alert('Please provide your signature');
+            e.preventDefault();
+        } else {
+            document.getElementById('id_signature_data').value = signaturePad.toDataURL();
+        }
+    });
+</script>
+{% endblock %} 

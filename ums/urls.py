@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from . import view_document
+from .views import submit_term_withdrawal
 
 
 urlpatterns = [
@@ -28,10 +29,12 @@ urlpatterns = [
     # 🔹 Form Submission Routes
     path("submit/rce/", views.submit_rce_form, name="submit_rce"),
     path("submit/special/", views.submit_special_form, name="submit_special"),
+    path('term-withdrawal/', submit_term_withdrawal, name='submit_term_withdrawal'),
 
     # 🔹 Form Review Routes
     path("review/rce/<int:form_id>/", views.review_rce_form, name="review_rce"),
     path("review/special/<int:form_id>/", views.review_special_form, name="review_special"),
+    path("review/term-withdrawal/<int:form_id>/", views.review_term_withdrawal, name="review_term_withdrawal"),
 
     # 🔹 User Requests Route
     path("requests/", views.user_requests, name="user_requests"),

@@ -1,0 +1,112 @@
+{% extends "ums/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Review Term Withdrawal Request</h2>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5>Student Information</h5>
+                    <p><strong>Name:</strong> {{ form.user.name }}</p>
+                    <p><strong>Email:</strong> {{ form.user.email }}</p>
+                    <p><strong>MyUH ID:</strong> {{ form.myuh_id }}</p>
+                    <p><strong>Phone:</strong> {{ form.phone_number }}</p>
+                    <p><strong>Program Plan:</strong> {{ form.program_plan }}</p>
+                    <p><strong>Academic Career:</strong> {{ form.academic_career }}</p>
+                </div>
+                <div class="col-md-6">
+                    <h5>Withdrawal Details</h5>
+                    <p><strong>Term:</strong> {{ form.withdrawal_term }}</p>
+                    <p><strong>Year:</strong> {{ form.withdrawal_year }}</p>
+                    <p><strong>Submitted:</strong> {{ form.submitted_at|date:"Y-m-d H:i" }}</p>
+                    {% if form.organizational_unit %}
+                    <p><strong>Organizational Unit:</strong> {{ form.organizational_unit.name }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h5>Acknowledgments</h5>
+                    <ul class="list-group">
+                        {% if form.financial_aid_acknowledged %}
+                        <li class="list-group-item">Financial Aid Acknowledged</li>
+                        {% endif %}
+                        {% if form.international_student_acknowledged %}
+                        <li class="list-group-item">International Student Acknowledged</li>
+                        {% endif %}
+                        {% if form.student_athlete_acknowledged %}
+                        <li class="list-group-item">Student Athlete Acknowledged</li>
+                        {% endif %}
+                        {% if form.veteran_acknowledged %}
+                        <li class="list-group-item">Veteran Acknowledged</li>
+                        {% endif %}
+                        {% if form.graduate_student_acknowledged %}
+                        <li class="list-group-item">Graduate Student Acknowledged</li>
+                        {% endif %}
+                        {% if form.doctoral_student_acknowledged %}
+                        <li class="list-group-item">Doctoral Student Acknowledged</li>
+                        {% endif %}
+                        {% if form.housing_acknowledged %}
+                        <li class="list-group-item">Housing Acknowledged</li>
+                        {% endif %}
+                        {% if form.dining_services_acknowledged %}
+                        <li class="list-group-item">Dining Services Acknowledged</li>
+                        {% endif %}
+                        {% if form.parking_acknowledged %}
+                        <li class="list-group-item">Parking Acknowledged</li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h5>Signature</h5>
+                    {% if form.signature_data %}
+                    <img src="{{ form.signature_data }}" alt="Student Signature" class="img-fluid" style="max-height: 200px;">
+                    <p><strong>Signed Date:</strong> {{ form.signature_date }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if org_context %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h5>Organizational Context</h5>
+                    <p><strong>Unit:</strong> {{ org_context.unit.name }}</p>
+                    {% if org_context.ancestors %}
+                    <p><strong>Ancestor Units:</strong></p>
+                    <ul>
+                        {% for ancestor in org_context.ancestors %}
+                        <li>{{ ancestor.name }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <form method="post" class="mt-4">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="decision" class="form-label">Decision</label>
+                    <select class="form-control" id="decision" name="decision" required>
+                        <option value="">Select a decision</option>
+                        <option value="approve">Approve</option>
+                        <option value="deny">Deny</option>
+                    </select>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <button type="submit" name="action" value="approve" class="btn btn-success">Approve</button>
+                    <button type="submit" name="action" value="deny" class="btn btn-danger">Deny</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

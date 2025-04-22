@@ -226,3 +226,53 @@ class SpecialCircumstanceForm(models.Model):
         org_unit = f" ({self.organizational_unit.name})" if self.organizational_unit else ""
         return f"Special Circumstance Form for {self.user.name} ({self.user.email}){org_unit}"
 
+class TermWithdrawalForm(models.Model):
+    """Model for student term withdrawal requests"""
+    user = models.ForeignKey(Users, on_delete=models.CASCADE)
+    myuh_id = models.CharField(max_length=20)
+    phone_number = models.CharField(max_length=20)
+    program_plan = models.CharField(max_length=100)
+    academic_career = models.CharField(max_length=50)
+    
+    TERM_CHOICES = [
+        ('Fall', 'Fall'),
+        ('Spring', 'Spring'),
+        ('Summer', 'Summer')
+    ]
+    withdrawal_term = models.CharField(max_length=10, choices=TERM_CHOICES)
+    withdrawal_year = models.IntegerField()
+    
+    # Initial checkboxes
+    financial_aid_acknowledged = models.BooleanField(default=False)
+    international_student_acknowledged = models.BooleanField(default=False)
+    student_athlete_acknowledged = models.BooleanField(default=False)
+    veteran_acknowledged = models.BooleanField(default=False)
+    graduate_student_acknowledged = models.BooleanField(default=False)
+    doctoral_student_acknowledged = models.BooleanField(default=False)
+    housing_acknowledged = models.BooleanField(default=False)
+    dining_services_acknowledged = models.BooleanField(default=False)
+    parking_acknowledged = models.BooleanField(default=False)
+    
+    # Final acknowledgment
+    final_acknowledgment = models.BooleanField(default=False)
+    signature_data = models.TextField(blank=True)  # Store the signature image data
+    signature_date = models.DateField()
+    
+    # Add organizational unit field
+    organizational_unit = models.ForeignKey(OrganizationalUnit, on_delete=models.SET_NULL, null=True, 
+                                          help_text="The organizational unit this request belongs to")
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('pending', 'Pending'),
+            ('approved', 'Approved'),
+            ('denied', 'Denied')
+        ],
+        default='pending'
+    )
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        org_unit = f" ({self.organizational_unit.name})" if self.organizational_unit else ""
+        return f"Term Withdrawal Form - {self.user.name} - {self.withdrawal_term} {self.withdrawal_year}{org_unit}"
+

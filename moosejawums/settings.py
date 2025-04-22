@@ -52,6 +52,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'mptt',
+    'crispy_forms',
+    'crispy_bootstrap5',
     'ums'
 ]
 
@@ -133,6 +135,19 @@ AUTH_PASSWORD_VALIDATORS = [
 env = environ.Env()
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
+# # Get the tenant ID first
+# tenant_id = env('TENANT_ID')
+
+# MICROSOFT_AUTH = {
+#     'TENANT_ID': tenant_id,
+#     'CLIENT_ID': env('CLIENT_ID'),
+#     'CLIENT_SECRET': env('CLIENT_SECRET'),
+#     'REDIRECT_URI': "http://localhost:8000/auth/callback/",
+#     'AUTHORITY': f"https://login.microsoftonline.com/{tenant_id}",
+#     'SCOPE': ["User.Read"]
+# }
+
+#normal login
 MICROSOFT_AUTH = {
     'TENANT_ID': env('TENANT_ID',default="common"),
     'CLIENT_ID': env('CLIENT_ID'),
@@ -141,6 +156,7 @@ MICROSOFT_AUTH = {
     'AUTHORITY': "https://login.microsoftonline.com/common",
     'SCOPE': ["User.Read"]
 }
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
@@ -185,3 +201,7 @@ MESSAGE_TAGS = {
     messages.INFO: "info",
     messages.WARNING: "warning",
 }
+
+# Crispy Forms Settings
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"

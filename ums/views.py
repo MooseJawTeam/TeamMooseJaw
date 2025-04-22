@@ -17,6 +17,7 @@ from .models import (
     AdminSignature,
     OrganizationalUnit,
     UserOrganizationAssignment,
+    TermWithdrawalForm,
 )
 from .decorators import role_required
 from django.contrib import messages
@@ -30,6 +31,7 @@ import uuid
 from datetime import datetime, timezone
 from .pdf_utils import generate_pdf
 from django.template.loader import render_to_string
+from .forms import TermWithdrawalFormForm
 
 
 
@@ -69,10 +71,16 @@ def user(request):
         status='pending'
     ).order_by('-submitted_at')
 
+    # Get all term withdrawal forms for the user
+    term_withdrawal_forms = TermWithdrawalForm.objects.filter(
+        user_id=user_id
+    ).order_by('-submitted_at')
+
     context = {
         "user": user_data,
         "pending_rce_forms": pending_rce_forms,
-        "pending_special_forms": pending_special_forms
+        "pending_special_forms": pending_special_forms,
+        "term_withdrawal_forms": term_withdrawal_forms
     }
 
     return render(request, "ums/user.html", context)
@@ -103,6 +111,9 @@ def admin_dashboard(request):
     
     # Get pending Special Circumstance forms
     pending_special_forms = SpecialCircumstanceForm.objects.filter(status='pending').select_related('user').order_by('-submitted_at')
+    
+    # Get pending Term Withdrawal forms
+    pending_term_withdrawals = TermWithdrawalForm.objects.filter(status='pending').select_related('user').order_by('-submitted_at')
     
     # Get organizational units
     organizations = OrganizationalUnit.objects.all()
@@ -163,6 +174,7 @@ def admin_dashboard(request):
         "admin_user": admin_user,
         "pending_rce_forms": pending_rce_forms,
         "pending_special_forms": pending_special_forms,
+        "pending_term_withdrawals": pending_term_withdrawals,
         "organizations": organizations,
         "approver_assignments": approver_assignments
     }
@@ -217,10 +229,6 @@ def callback(request):
         if not user_email or not user_id:
             messages.error(request, "Your Microsoft account is missing an email. Contact support.")
             return redirect("ums-login")
-
-        # if not(user_email.endswith("@uh.edu") or user_email.endswith("@cougarnet.uh.edu")):
-        #     messages.error(request, "Access restricted to Cougar ID's")
-        #     return redirect("ums-login")
 
         # Find or create a user in the database
         user, created = Users.objects.get_or_create(
@@ -963,5 +971,212 @@ def manage_approver(request, user_id, org_id):
         "user": user,
         "organization": organization,
         "assignment": assignment
+    })
+
+def submit_term_withdrawal(request):
+    if "user_id" not in request.session:
+        messages.error(request, "Please log in to submit a term withdrawal form.")
+        return redirect("ums-login")
+    
+    user = Users.objects.get(id=request.session["user_id"])
+    
+    if request.method == "POST":
+        form = TermWithdrawalFormForm(request.POST)
+        if form.is_valid():
+            term_withdrawal = form.save(commit=False)
+            term_withdrawal.user = user
+            term_withdrawal.status = 'pending'
+            term_withdrawal.save()
+            messages.success(request, "Your term withdrawal form has been submitted successfully.")
+            return redirect("user")
+    else:
+        form = TermWithdrawalFormForm()
+    
+    context = {
+        "form": form,
+        "user": {
+            "name": user.name,
+            "email": user.email,
+            "id": user.id
+        }
+    }
+    
+    return render(request, "ums/term_withdrawal.html", context)
+
+@role_required(['Admin'])
+def review_term_withdrawal(request, form_id):
+    form = get_object_or_404(TermWithdrawalForm, id=form_id)
+    
+    # Check if user has permission to review this form
+    user = Users.objects.get(id=request.session['user_id'])
+    can_review = True
+    
+    # If form has organizational unit, check permissions
+    if form.organizational_unit:
+        # Get all user's organization assignments
+        user_assignments = UserOrganizationAssignment.objects.filter(user=user)
+        
+        # Check if user is an organizational approver in any relevant unit
+        is_org_approver = user_assignments.filter(
+            is_organizational_approver=True
+        ).exists()
+        
+        # Check if user is a direct approver for the form's unit
+        is_unit_approver = user_assignments.filter(
+            organizational_unit=form.organizational_unit,
+            is_approver=True
+        ).exists()
+        
+        # Check if user is an approver for any ancestor unit
+        ancestor_units = []
+        if hasattr(form.organizational_unit, 'get_ancestors'):
+            ancestor_units = form.organizational_unit.get_ancestors()
+            
+        is_ancestor_approver = user_assignments.filter(
+            organizational_unit__in=ancestor_units,
+            is_approver=True
+        ).exists()
+        
+        can_review = is_org_approver or is_unit_approver or is_ancestor_approver or user.role.lower() == 'admin'
+    
+    if not can_review and user.role.lower() != 'admin':
+        messages.error(request, "You don't have permission to review this form")
+        return redirect('admin_dashboard')
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        decision = request.POST.get('decision')
+        
+        if not decision:
+            messages.error(request, 'Please select a decision (Approve/Deny)')
+            return render(request, 'ums/review_term_withdrawal.html', {'form': form})
+        
+        try:
+            if action == 'approve':
+                # Update form status
+                form.status = 'approved'
+                form.save()  # Save the status change first
+                
+                messages.success(request, 'Term withdrawal request approved successfully.')
+                
+                # Generate decision document
+                admin_user = Users.objects.get(id=request.session['user_id'])
+                
+                # Prepare context for document generation
+                context = {
+                    'document_title': 'Term Withdrawal Decision',
+                    'document_id': str(uuid.uuid4()),
+                    'generation_date': datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
+                    'username': form.user.name,
+                    'useremail': form.user.email,
+                    'custom_text': f"Term: {form.withdrawal_term} {form.withdrawal_year}",
+                    'adminname': admin_user.name,
+                    'adminposition': "Administrator",
+                    'decision': 'Pass'
+                }
+                
+                # Create document template if it doesn't exist
+                template_name = "approved.html" if decision == "approve" else "denied.html"
+                template, created = DocumentTemplate.objects.get_or_create(
+                    name=template_name,
+                    defaults={
+                        'description': f"Template for {decision} decisions",
+                        'html_content': render_to_string(f'pdf_templates/{template_name}', context)
+                    }
+                )
+                
+                # Generate the PDF
+                document = generate_pdf(
+                    template_id=template.id,
+                    data=context,
+                    user=form.user,
+                    admin_name=admin_user.name,
+                    admin_position="Administrator"
+                )
+                
+                # Create document approval with organizational context
+                if form.organizational_unit:
+                    DocumentApproval.objects.create(
+                        document=document,
+                        approver=admin_user,
+                        action="Approved",
+                        comments=f"Term Withdrawal Form approved by {admin_user.name}",
+                        organizational_unit=form.organizational_unit,
+                        is_org_level_approval=is_org_approver if 'is_org_approver' in locals() else False
+                    )
+                
+            elif action == 'deny':
+                # Update form status
+                form.status = 'denied'
+                form.save()  # Save the status change first
+                
+                messages.success(request, 'Term withdrawal request denied.')
+                
+                # Generate decision document
+                admin_user = Users.objects.get(id=request.session['user_id'])
+                
+                # Prepare context for document generation
+                context = {
+                    'document_title': 'Term Withdrawal Decision',
+                    'document_id': str(uuid.uuid4()),
+                    'generation_date': datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
+                    'username': form.user.name,
+                    'useremail': form.user.email,
+                    'custom_text': f"Term: {form.withdrawal_term} {form.withdrawal_year}",
+                    'adminname': admin_user.name,
+                    'adminposition': "Administrator",
+                    'decision': 'Fail'
+                }
+                
+                # Create document template if it doesn't exist
+                template_name = "approved.html" if decision == "approve" else "denied.html"
+                template, created = DocumentTemplate.objects.get_or_create(
+                    name=template_name,
+                    defaults={
+                        'description': f"Template for {decision} decisions",
+                        'html_content': render_to_string(f'pdf_templates/{template_name}', context)
+                    }
+                )
+                
+                # Generate the PDF
+                document = generate_pdf(
+                    template_id=template.id,
+                    data=context,
+                    user=form.user,
+                    admin_name=admin_user.name,
+                    admin_position="Administrator"
+                )
+                
+                # Create document approval with organizational context
+                if form.organizational_unit:
+                    DocumentApproval.objects.create(
+                        document=document,
+                        approver=admin_user,
+                        action="Denied",
+                        comments=f"Term Withdrawal Form denied by {admin_user.name}",
+                        organizational_unit=form.organizational_unit,
+                        is_org_level_approval=is_org_approver if 'is_org_approver' in locals() else False
+                    )
+            
+            return redirect('admin_dashboard')
+        except Exception as e:
+            messages.error(request, f'Error processing request: {str(e)}')
+            return render(request, 'ums/review_term_withdrawal.html', {'form': form})
+    
+    # Get organizational context for template
+    org_context = None
+    if form.organizational_unit:
+        ancestors = []
+        if hasattr(form.organizational_unit, 'get_ancestors'):
+            ancestors = form.organizational_unit.get_ancestors()
+            
+        org_context = {
+            'unit': form.organizational_unit,
+            'ancestors': ancestors
+        }
+    
+    return render(request, 'ums/review_term_withdrawal.html', {
+        'form': form,
+        'org_context': org_context
     })
 

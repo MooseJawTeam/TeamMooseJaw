@@ -100,6 +100,53 @@
                 </div>
             </div>
             
+            <!-- Pending Term Withdrawal Forms -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title mb-0">
+                                <i class="fas fa-file-alt me-2"></i>Pending Term Withdrawals
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            {% if pending_term_withdrawals %}
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Student</th>
+                                                <th>Term</th>
+                                                <th>Year</th>
+                                                <th>Submitted</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for form in pending_term_withdrawals %}
+                                            <tr>
+                                                <td>{{ form.user.name }}</td>
+                                                <td>{{ form.withdrawal_term }}</td>
+                                                <td>{{ form.withdrawal_year }}</td>
+                                                <td>{{ form.submitted_at|date:"Y-m-d H:i" }}</td>
+                                                <td>
+                                                    <a href="{% url 'review_term_withdrawal' form.id %}" class="btn btn-sm btn-primary">
+                                                        Review
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <p class="text-muted">No pending term withdrawal requests.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <!-- User Management Section -->
             <div class="card">
                 <div class="card-header">
@@ -243,4 +290,3 @@
     }
 </style>
 {% endblock %}
-
