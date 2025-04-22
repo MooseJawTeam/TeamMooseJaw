@@ -1,0 +1,139 @@
+{% extends "ums/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-id-card me-2"></i>Veteran Certification Form
+                    </h3>
+                    <a href="{% url 'user' %}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+                    </a>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Phone</label>
+                                <input type="text" name="phone" class="form-control" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Academic Career</label>
+                                <select name="academic_career" class="form-select" required>
+                                    <option value="UGRD">UGRD</option>
+                                    <option value="GRAD">GRAD</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">VA Chapter</label>
+                                <select name="va_chapter" class="form-select" required>
+                                    <option value="Chapter 31">Chapter 31</option>
+                                    <option value="Chapter 33">Chapter 33</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">VA Counselor's Email</label>
+                                <input type="email" name="va_counselor_email" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">VA Authorization No.</label>
+                                <input type="text" name="va_authorization_no" class="form-control" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Intended Major</label>
+                                <input type="text" name="intended_major" class="form-control">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">First time using benefits at UH?</label>
+                                <select name="first_time_using" class="form-select" required>
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Number of hours to be certified for this term</label>
+                                <input type="number" name="certified_hours" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Is this your final semester before graduation?</label>
+                                <select name="final_semester" class="form-select" required>
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Organizational Unit</label>
+                                <select name="organizational_unit" class="form-select">
+                                    <option value="">Select an organizational unit</option>
+                                    {% for org in organizations %}
+                                        <option value="{{ org.id }}">{{ org.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="text-end mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-2"></i>Submit Form
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<style>
+    .card {
+        border: none;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        padding: 1rem 1.5rem;
+    }
+    .card-title {
+        color: #1F2937;
+        font-size: 1.25rem;
+        font-weight: bold;
+        margin: 0;
+    }
+    .form-label {
+        font-weight: 500;
+        color: #4B5563;
+    }
+    .form-control, .form-select {
+        border-radius: 0.375rem;
+        border: 1px solid #D1D5DB;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #3B82F6;
+        box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+    }
+    .btn-primary {
+        background-color: #3B82F6;
+        border-color: #3B82F6;
+    }
+    .btn-primary:hover {
+        background-color: #2563EB;
+        border-color: #2563EB;
+    }
+</style>
+{% endblock %} 

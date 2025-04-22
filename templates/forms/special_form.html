@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "ums/base.html" %}
 {% block content %}
 <div class="container mt-4">
     <h2>Special Circumstance Request</h2>
@@ -12,28 +12,27 @@
             </select>
         </div>
         <div class="mb-3">
-            <label for="graduation_date" class="form-label">Expected Graduation Date</label>
-            <input type="text" name="graduation_date" class="form-control" required placeholder="e.g. May 2025">
+            <label for="graduation_date" class="form-label">Graduation Date</label>
+            <input type="text" name="graduation_date" class="form-control" required>
         </div>
         <div class="mb-3">
             <label for="special_request_type" class="form-label">Request Type</label>
             <input type="text" name="special_request_type" class="form-control" required>
         </div>
         <div class="mb-3">
-            <label for="organizational_unit" class="form-label">Department/Unit</label>
-            <select class="form-select" id="organizational_unit" name="organizational_unit">
-                <option value="">Select Department/Unit</option>
-                {% for org in organizations %}
-                <option value="{{ org.id }}">{{ org.name }}</option>
-                {% endfor %}
-            </select>
-            <div class="form-text">Select the department or unit handling this request</div>
+            <label for="reason" class="form-label">Reason</label>
+            <textarea name="reason" class="form-control" rows="3" required></textarea>
         </div>
         <div class="mb-3">
-            <label for="reason" class="form-label">Reason</label>
-            <textarea name="reason" class="form-control" rows="4" required></textarea>
+            <label for="organizational_unit" class="form-label">Organizational Unit</label>
+            <select name="organizational_unit" class="form-select">
+                <option value="">Select an organizational unit</option>
+                {% for org in organizations %}
+                    <option value="{{ org.id }}">{{ org.name }}</option>
+                {% endfor %}
+            </select>
         </div>
-        <button type="submit" class="btn btn-primary">Submit Request</button>
+        <button type="submit" class="btn btn-primary">Submit</button>
     </form>
 </div>
 {% endblock %}

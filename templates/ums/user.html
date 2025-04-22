@@ -11,220 +11,332 @@
             <h2 class="mb-0">Hello, Welcome to your Dashboard {{user.name}}</h2>
         </div>
     </div>
+
     <div class="row">
-        <div class="col-12">
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <h3 class="card-title">
-                                <i class="fas fa-user-circle me-2"></i>Your Info
-                            </h3>
-                            <p class="card-text">
-                                <strong>Role:</strong> {{user.role}}<br>
-                                <strong>Email:</strong> {{user.email}}<br>
-                                <strong>ID:</strong> {{user.id}}<br>
-                                <strong>Status:</strong> 
-                                <span class="badge {% if user.status == 'Active' %}bg-success{% else %}bg-danger{% endif %}">
-                                    {{user.status}}
-                                </span>
-                                <a href="{% url 'delegate_approval' %}" class="btn btn-outline-secondary mt-2">
-                                    <i class="fas fa-random me-1"></i> Delegate Approval
-                                </a>
-                                
-                            </p>
-                        </div>
-                    </div>
+        <!-- User Info Card -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title">
+                        <i class="fas fa-user-circle me-2"></i>Your Info
+                    </h3>
+                    <p class="card-text">
+                        <strong>Role:</strong> {{user.role}}<br>
+                        <strong>Email:</strong> {{user.email}}<br>
+                        <strong>ID:</strong> {{user.id}}<br>
+                        <strong>Status:</strong> 
+                        <span class="badge {% if user.status == 'Active' %}bg-success{% else %}bg-danger{% endif %}">
+                            {{user.status}}
+                        </span>
+                        <a href="{% url 'delegate_approval' %}" class="btn btn-outline-secondary mt-2">
+                            <i class="fas fa-random me-1"></i> Delegate Approval
+                        </a>
+                    </p>
                 </div>
-                
-                <!-- Term Withdrawal Card -->
-                <div class="col-md-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <h3 class="card-title">
-                                <i class="fas fa-file-alt me-2"></i>Term Withdrawal
-                            </h3>
-                            <p class="card-text">Submit a request to withdraw from a term.</p>
-                            <a href="{% url 'submit_term_withdrawal' %}" class="btn btn-primary">Submit Term Withdrawal</a>
-                        </div>
-                    </div>
+            </div>
+        </div>
+
+        <!-- Forms Section -->
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-file-alt me-2"></i>Available Forms
+                    </h3>
                 </div>
-                
-                <!-- RCE Request Form Card -->
-                <div class="col-md-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <h3 class="card-title">
-                                <i class="fas fa-file-alt me-2"></i>RCE Request Form
-                            </h3>
-                            <form method="post" action="{% url 'submit_rce' %}">
-                                {% csrf_token %}
-                                <div class="mb-3">
-                                    <label for="exam_date" class="form-label">Exam Date</label>
-                                    <input type="date" class="form-control" id="exam_date" name="exam_date" required>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Veteran Certification Form Link -->
+                        <div class="col-md-6 mb-4">
+                            <div class="form-link-card">
+                                <div class="form-link-icon">
+                                    <i class="fas fa-id-card"></i>
                                 </div>
-                                <div class="mb-3">
-                                    <label for="semester" class="form-label">Semester</label>
-                                    <input type="text" class="form-control" id="semester" name="semester" required>
+                                <div class="form-link-content">
+                                    <h4>Veteran Certification Form</h4>
+                                    <p>Submit your veteran certification information</p>
+                                    <a href="{% url 'veteran_certification' %}" class="btn btn-primary">
+                                        <i class="fas fa-arrow-right me-2"></i>Go to Form
+                                    </a>
                                 </div>
-                                <div class="mb-3">
-                                    <label for="comments" class="form-label">Reason for Request</label>
-                                    <textarea class="form-control" id="comments" name="comments" rows="3" required></textarea>
-                                </div>
-                                <button type="submit" class="btn btn-primary">Submit RCE Request</button>
-                            </form>
+                            </div>
                         </div>
-                    </div>
-                </div>
-                
-                <!-- Special Circumstance Form Card -->
-                <div class="col-md-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <h3 class="card-title">
-                                <i class="fas fa-file-alt me-2"></i>Special Circumstance Form
-                            </h3>
-                            <form method="post" action="{% url 'submit_special' %}">
-                                {% csrf_token %}
-                                <div class="mb-3">
-                                    <label for="degree" class="form-label">Degree</label>
-                                    <input type="text" class="form-control" id="degree" name="degree" required>
+
+                        <!-- Term Withdrawal Form Link -->
+                        <div class="col-md-6 mb-4">
+                            <div class="form-link-card">
+                                <div class="form-link-icon">
+                                    <i class="fas fa-file-alt"></i>
                                 </div>
-                                <div class="mb-3">
-                                    <label for="graduation_date" class="form-label">Graduation Date</label>
-                                    <input type="date" class="form-control" id="graduation_date" name="graduation_date" required>
+                                <div class="form-link-content">
+                                    <h4>Term Withdrawal Form</h4>
+                                    <p>Request to withdraw from a term</p>
+                                    <a href="{% url 'submit_term_withdrawal' %}" class="btn btn-primary">
+                                        <i class="fas fa-arrow-right me-2"></i>Go to Form
+                                    </a>
                                 </div>
-                                <div class="mb-3">
-                                    <label for="reason" class="form-label">Reason</label>
-                                    <textarea class="form-control" id="reason" name="reason" rows="3" required></textarea>
+                            </div>
+                        </div>
+
+                        <!-- RCE Request Form Link -->
+                        <div class="col-md-6 mb-4">
+                            <div class="form-link-card">
+                                <div class="form-link-icon">
+                                    <i class="fas fa-file-alt"></i>
                                 </div>
-                                <div class="mb-3">
-                                    <label for="special_request_type" class="form-label">Request Type</label>
-                                    <select class="form-control" id="special_request_type" name="special_request_type" required>
-                                        <option value="extension">Extension</option>
-                                        <option value="exception">Exception</option>
-                                        <option value="other">Other</option>
-                                    </select>
+                                <div class="form-link-content">
+                                    <h4>RCE Request Form</h4>
+                                    <p>Submit a request for RCE</p>
+                                    <a href="{% url 'submit_rce' %}" class="btn btn-primary">
+                                        <i class="fas fa-arrow-right me-2"></i>Go to Form
+                                    </a>
                                 </div>
-                                <button type="submit" class="btn btn-primary">Submit Special Form</button>
-                            </form>
+                            </div>
+                        </div>
+
+                        <!-- Special Circumstance Form Link -->
+                        <div class="col-md-6 mb-4">
+                            <div class="form-link-card">
+                                <div class="form-link-icon">
+                                    <i class="fas fa-file-alt"></i>
+                                </div>
+                                <div class="form-link-content">
+                                    <h4>Special Circumstance Form</h4>
+                                    <p>Submit a special circumstance request</p>
+                                    <a href="{% url 'submit_special' %}" class="btn btn-primary">
+                                        <i class="fas fa-arrow-right me-2"></i>Go to Form
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <!-- Your Requests Section -->
-            <div class="row mt-4">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-body">
-                            <h3 class="card-title">
-                                <i class="fas fa-list me-2"></i>Your Requests
-                            </h3>
-                            
-                            <!-- Term Withdrawal Requests -->
-                            {% if term_withdrawal_forms %}
-                                <h4 class="mt-3">Term Withdrawal Requests</h4>
-                                <div class="table-responsive">
-                                    <table class="table table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>Term</th>
-                                                <th>Year</th>
-                                                <th>Submitted</th>
-                                                <th>Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for form in term_withdrawal_forms %}
-                                                <tr>
-                                                    <td>{{ form.withdrawal_term }}</td>
-                                                    <td>{{ form.withdrawal_year }}</td>
-                                                    <td>{{ form.submitted_at|date:"F j, Y, g:i a" }}</td>
-                                                    <td>
-                                                        <span class="badge {% if form.status == 'approved' %}bg-success{% elif form.status == 'denied' %}bg-danger{% else %}bg-warning{% endif %}">
-                                                            {{ form.status|title }}
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            {% endif %}
-
-                            <!-- RCE Requests -->
-                            {% if pending_rce_forms %}
-                                <h4 class="mt-3">RCE Requests</h4>
-                                <div class="table-responsive">
-                                    <table class="table table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>Exam Date</th>
-                                                <th>Semester</th>
-                                                <th>Comments</th>
-                                                <th>Submitted</th>
-                                                <th>Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for form in pending_rce_forms %}
-                                                <tr>
-                                                    <td>{{ form.exam_date }}</td>
-                                                    <td>{{ form.semester }}</td>
-                                                    <td>{{ form.comments }}</td>
-                                                    <td>{{ form.submitted_at|date:"F j, Y, g:i a" }}</td>
-                                                    <td>
-                                                        <span class="badge bg-warning">Pending</span>
-                                                    </td>
-                                                </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            {% endif %}
-
-                            <!-- Special Circumstance Requests -->
-                            {% if pending_special_forms %}
-                                <h4 class="mt-3">Special Circumstance Requests</h4>
-                                <div class="table-responsive">
-                                    <table class="table table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>Degree</th>
-                                                <th>Graduation Date</th>
-                                                <th>Request Type</th>
-                                                <th>Reason</th>
-                                                <th>Submitted</th>
-                                                <th>Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for form in pending_special_forms %}
-                                                <tr>
-                                                    <td>{{ form.degree }}</td>
-                                                    <td>{{ form.graduation_date }}</td>
-                                                    <td>{{ form.special_request_type }}</td>
-                                                    <td>{{ form.reason }}</td>
-                                                    <td>{{ form.submitted_at|date:"F j, Y, g:i a" }}</td>
-                                                    <td>
-                                                        <span class="badge bg-warning">Pending</span>
-                                                    </td>
-                                                </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            {% endif %}
-
-                            {% if not term_withdrawal_forms and not pending_rce_forms and not pending_special_forms %}
-                                <div class="alert alert-info mt-3">
-                                    <i class="fas fa-info-circle me-2"></i>
-                                    No requests found.
-                                </div>
-                            {% endif %}
+    <!-- Your Requests Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-list me-2"></i>Your Requests
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <!-- My Pending RCE Forms -->
+                    {% if user_pending_rce_forms %}
+                        <h4 class="mt-3">My Pending RCE Requests</h4>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Exam Date</th>
+                                        <th>Semester</th>
+                                        <th>Comments</th>
+                                        <th>Submitted</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for form in user_pending_rce_forms %}
+                                        <tr>
+                                            <td>{{ form.exam_date }}</td>
+                                            <td>{{ form.semester }}</td>
+                                            <td>{{ form.comments }}</td>
+                                            <td>{{ form.submitted_at|date:"F j, Y, g:i a" }}</td>
+                                            <td>
+                                                <span class="badge bg-warning">Pending</span>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
-                    </div>
+                    {% endif %}
+
+                    <!-- My Pending Term Withdrawal Forms -->
+                    {% if user_pending_term_withdrawal_forms %}
+                        <h4 class="mt-3">My Pending Term Withdrawal Requests</h4>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Term</th>
+                                        <th>Reason</th>
+                                        <th>Submitted</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for form in user_pending_term_withdrawal_forms %}
+                                        <tr>
+                                            <td>{{ form.term }}</td>
+                                            <td>{{ form.reason }}</td>
+                                            <td>{{ form.submitted_at|date:"F j, Y, g:i a" }}</td>
+                                            <td>
+                                                <span class="badge bg-warning">Pending</span>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+
+                    <!-- My Pending Special Circumstance Forms -->
+                    {% if user_pending_special_forms %}
+                        <h4 class="mt-3">My Pending Special Circumstance Requests</h4>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Degree</th>
+                                        <th>Request Type</th>
+                                        <th>Submitted</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for form in user_pending_special_forms %}
+                                        <tr>
+                                            <td>{{ form.degree }}</td>
+                                            <td>{{ form.special_request_type }}</td>
+                                            <td>{{ form.submitted_at|date:"F j, Y, g:i a" }}</td>
+                                            <td>
+                                                <span class="badge bg-warning">Pending</span>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+
+                    <!-- My Pending Veteran Certification Forms -->
+                    {% if user_pending_veteran_forms %}
+                        <h4 class="mt-3">My Pending Veteran Certification Requests</h4>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Academic Career</th>
+                                        <th>VA Chapter</th>
+                                        <th>Submitted</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for form in user_pending_veteran_forms %}
+                                        <tr>
+                                            <td>{{ form.academic_career }}</td>
+                                            <td>{{ form.va_chapter }}</td>
+                                            <td>{{ form.submitted_at|date:"F j, Y, g:i a" }}</td>
+                                            <td>
+                                                <span class="badge bg-warning">Pending</span>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+
+                    <!-- RCE Requests for Approval -->
+                    {% if pending_rce_forms %}
+                        <h4 class="mt-3">RCE Requests for Approval</h4>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Exam Date</th>
+                                        <th>Semester</th>
+                                        <th>Comments</th>
+                                        <th>Submitted</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for form in pending_rce_forms %}
+                                        <tr>
+                                            <td>{{ form.exam_date }}</td>
+                                            <td>{{ form.semester }}</td>
+                                            <td>{{ form.comments }}</td>
+                                            <td>{{ form.submitted_at|date:"F j, Y, g:i a" }}</td>
+                                            <td>
+                                                <a href="{% url 'forms:review_rce' form.id %}" class="btn btn-sm btn-primary">Review</a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+
+                    <!-- Special Circumstance Requests for Approval -->
+                    {% if pending_special_forms %}
+                        <h4 class="mt-3">Special Circumstance Requests for Approval</h4>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Degree</th>
+                                        <th>Request Type</th>
+                                        <th>Submitted</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for form in pending_special_forms %}
+                                        <tr>
+                                            <td>{{ form.degree }}</td>
+                                            <td>{{ form.special_request_type }}</td>
+                                            <td>{{ form.submitted_at|date:"F j, Y, g:i a" }}</td>
+                                            <td>
+                                                <a href="{% url 'forms:review_special' form.id %}" class="btn btn-sm btn-primary">Review</a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+
+                    <!-- Veteran Certification Requests for Approval -->
+                    {% if pending_veteran_forms %}
+                        <h4 class="mt-3">Veteran Certification Requests for Approval</h4>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Academic Career</th>
+                                        <th>VA Chapter</th>
+                                        <th>Submitted</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for form in pending_veteran_forms %}
+                                        <tr>
+                                            <td>{{ form.academic_career }}</td>
+                                            <td>{{ form.va_chapter }}</td>
+                                            <td>{{ form.submitted_at|date:"F j, Y, g:i a" }}</td>
+                                            <td>
+                                                <a href="{% url 'forms:review_veteran' form.id %}" class="btn btn-sm btn-primary">Review</a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+
+                    {% if not user_pending_rce_forms and not user_pending_term_withdrawal_forms and not user_pending_special_forms and not user_pending_veteran_forms and not pending_rce_forms and not pending_special_forms and not pending_veteran_forms %}
+                        <div class="alert alert-info mt-3">
+                            No pending requests at this time.
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -233,17 +345,58 @@
 {% endblock %}
 
 {% block extra_js %}
-  <style>
+<style>
     .card {
-        margin-bottom: 1rem;
+        border: none;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1.5rem;
+    }
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        padding: 1rem 1.5rem;
     }
     .card-title {
         color: #1F2937;
-      font-size: 1.25rem;
-      font-weight: bold;
+        font-size: 1.25rem;
+        font-weight: bold;
+        margin: 0;
     }
-    .card-text {
-        color: #4B5563;
+    .form-link-card {
+        background-color: #f8f9fa;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.2s ease;
+    }
+    .form-link-card:hover {
+        transform: translateY(-2px);
+    }
+    .form-link-icon {
+        font-size: 2rem;
+        color: #3B82F6;
+        margin-bottom: 1rem;
+    }
+    .form-link-content h4 {
+        color: #1F2937;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    .form-link-content p {
+        color: #6B7280;
+        margin-bottom: 1rem;
+    }
+    .btn-primary {
+        background-color: #3B82F6;
+        border-color: #3B82F6;
+    }
+    .btn-primary:hover {
+        background-color: #2563EB;
+        border-color: #2563EB;
     }
     .badge {
         font-size: 0.875rem;
@@ -259,32 +412,13 @@
     .bg-warning {
         background-color: #F59E0B !important;
     }
-    .form-label {
-        font-weight: 500;
-        color: #4B5563;
-    }
-    .form-control {
-        border-radius: 0.375rem;
-        border: 1px solid #D1D5DB;
-    }
-    .form-control:focus {
-        border-color: #3B82F6;
-        box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
-    }
-    .btn-primary {
-        background-color: #3B82F6;
-        border-color: #3B82F6;
-    }
-    .btn-primary:hover {
-        background-color: #2563EB;
-        border-color: #2563EB;
-    }
     .table th {
         font-weight: 600;
         color: #1F2937;
     }
     .table td {
-      color: #4B5563;
+        color: #4B5563;
     }
-  </style>
+</style>
 {% endblock %}
+

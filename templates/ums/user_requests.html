@@ -39,23 +39,11 @@
                                     <td>{{ form.comments }}</td>
                                     <td>{{ form.submitted_at|date:"F j, Y, g:i a" }}</td>
                                     <td>
-                                        {% if form.status == 'pending' %}
-                                            <span class="badge bg-warning">Pending</span>
-                                        {% elif form.status == 'approved' %}
-                                            <span class="badge bg-success">Approved</span>
-                                        {% else %}
-                                            <span class="badge bg-danger">Denied</span>
-                                        {% endif %}
+                                        <span class="badge {% if form.status == 'approved' %}bg-success{% elif form.status == 'denied' %}bg-danger{% else %}bg-warning{% endif %}">
+                                            {{ form.status|title }}
+                                        </span>
                                     </td>
-                                    <td>
-                                        {% if form.decision %}
-                                            <span class="badge {% if form.decision == 'Pass' %}bg-success{% else %}bg-danger{% endif %}">
-                                                {{ form.decision }}
-                                            </span>
-                                        {% else %}
-                                            <span class="badge bg-secondary">N/A</span>
-                                        {% endif %}
-                                    </td>
+                                    <td>{{ form.decision|default:"-" }}</td>
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -63,7 +51,6 @@
                 </div>
             {% else %}
                 <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>
                     No RCE requests found.
                 </div>
             {% endif %}
@@ -71,7 +58,7 @@
     </div>
 
     <!-- Special Circumstance Requests -->
-    <div class="card">
+    <div class="card mb-4">
         <div class="card-body">
             <h3 class="card-title">
                 <i class="fas fa-file-alt me-2"></i>Special Circumstance Requests
@@ -82,30 +69,24 @@
                         <thead>
                             <tr>
                                 <th>Degree</th>
-                                <th>Graduation Date</th>
                                 <th>Request Type</th>
-                                <th>Reason</th>
                                 <th>Submitted</th>
                                 <th>Status</th>
+                                <th>Decision</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for form in special_forms %}
                                 <tr>
                                     <td>{{ form.degree }}</td>
-                                    <td>{{ form.graduation_date }}</td>
                                     <td>{{ form.special_request_type }}</td>
-                                    <td>{{ form.reason }}</td>
                                     <td>{{ form.submitted_at|date:"F j, Y, g:i a" }}</td>
                                     <td>
-                                        {% if form.status == 'pending' %}
-                                            <span class="badge bg-warning">Pending</span>
-                                        {% elif form.status == 'approved' %}
-                                            <span class="badge bg-success">Approved</span>
-                                        {% else %}
-                                            <span class="badge bg-danger">Denied</span>
-                                        {% endif %}
+                                        <span class="badge {% if form.status == 'approved' %}bg-success{% elif form.status == 'denied' %}bg-danger{% else %}bg-warning{% endif %}">
+                                            {{ form.status|title }}
+                                        </span>
                                     </td>
+                                    <td>{{ form.decision|default:"-" }}</td>
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -113,24 +94,117 @@
                 </div>
             {% else %}
                 <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>
                     No Special Circumstance requests found.
                 </div>
             {% endif %}
         </div>
     </div>
+
+    <!-- Term Withdrawal Requests -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h3 class="card-title">
+                <i class="fas fa-file-alt me-2"></i>Term Withdrawal Requests
+            </h3>
+            {% if term_withdrawal_forms %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Term</th>
+                                <th>Reason</th>
+                                <th>Submitted</th>
+                                <th>Status</th>
+                                <th>Decision</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for form in term_withdrawal_forms %}
+                                <tr>
+                                    <td>{{ form.term }}</td>
+                                    <td>{{ form.reason }}</td>
+                                    <td>{{ form.submitted_at|date:"F j, Y, g:i a" }}</td>
+                                    <td>
+                                        <span class="badge {% if form.status == 'approved' %}bg-success{% elif form.status == 'denied' %}bg-danger{% else %}bg-warning{% endif %}">
+                                            {{ form.status|title }}
+                                        </span>
+                                    </td>
+                                    <td>{{ form.decision|default:"-" }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    No Term Withdrawal requests found.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Veteran Certification Requests -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h3 class="card-title">
+                <i class="fas fa-file-alt me-2"></i>Veteran Certification Requests
+            </h3>
+            {% if veteran_forms %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Academic Career</th>
+                                <th>VA Chapter</th>
+                                <th>Submitted</th>
+                                <th>Status</th>
+                                <th>Decision</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for form in veteran_forms %}
+                                <tr>
+                                    <td>{{ form.academic_career }}</td>
+                                    <td>{{ form.va_chapter }}</td>
+                                    <td>{{ form.submitted_at|date:"F j, Y, g:i a" }}</td>
+                                    <td>
+                                        <span class="badge {% if form.status == 'approved' %}bg-success{% elif form.status == 'denied' %}bg-danger{% else %}bg-warning{% endif %}">
+                                            {{ form.status|title }}
+                                        </span>
+                                    </td>
+                                    <td>{{ form.decision|default:"-" }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    No Veteran Certification requests found.
+                </div>
+            {% endif %}
+        </div>
+    </div>
 </div>
-{% endblock %}
 
 {% block extra_js %}
 <style>
     .card {
-        margin-bottom: 1rem;
+        border: none;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1.5rem;
+    }
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        padding: 1rem 1.5rem;
     }
     .card-title {
         color: #1F2937;
         font-size: 1.25rem;
         font-weight: bold;
+        margin: 0;
     }
     .badge {
         font-size: 0.875rem;
@@ -146,9 +220,6 @@
     .bg-warning {
         background-color: #F59E0B !important;
     }
-    .bg-secondary {
-        background-color: #6B7280 !important;
-    }
     .table th {
         font-weight: 600;
         color: #1F2937;
@@ -157,4 +228,5 @@
         color: #4B5563;
     }
 </style>
+{% endblock %}
 {% endblock %} 

@@ -1,0 +1,154 @@
+{% extends "ums/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>
+                <i class="fas fa-user-shield me-2"></i>Manage Approver Roles
+            </h2>
+            <p class="text-muted">Set approver roles for {{ user.name }} in {{ organization.name }}</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'organization_users' org_id=organization.id %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Users
+            </a>
+        </div>
+    </div>
+
+    {% if messages %}
+    <div class="row mb-4">
+        <div class="col-12">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title mb-0">
+                <i class="fas fa-user me-2"></i>{{ user.name }}
+            </h3>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{% url 'manage_approver' user_id=user.id org_id=organization.id %}">
+                {% csrf_token %}
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h5>User Information</h5>
+                        <dl class="row">
+                            <dt class="col-sm-4">Name</dt>
+                            <dd class="col-sm-8">{{ user.name }}</dd>
+                            
+                            <dt class="col-sm-4">Email</dt>
+                            <dd class="col-sm-8">{{ user.email }}</dd>
+                            
+                            <dt class="col-sm-4">Role</dt>
+                            <dd class="col-sm-8">{{ user.role }}</dd>
+                            
+                            <dt class="col-sm-4">Status</dt>
+                            <dd class="col-sm-8">
+                                <span class="badge {% if user.status == 'Active' %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ user.status }}
+                                </span>
+                            </dd>
+                        </dl>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Organization</h5>
+                        <dl class="row">
+                            <dt class="col-sm-4">Name</dt>
+                            <dd class="col-sm-8">{{ organization.name }}</dd>
+                            
+                            <dt class="col-sm-4">Description</dt>
+                            <dd class="col-sm-8">{{ organization.description|default:"No description" }}</dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h5>Approver Roles</h5>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="is_approver" name="is_approver" 
+                                   {% if assignment.is_approver %}checked{% endif %}>
+                            <label class="form-check-label" for="is_approver">
+                                Unit Approver
+                            </label>
+                            <div class="form-text">
+                                Can approve requests for this unit and its descendant units
+                            </div>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="is_organizational_approver" 
+                                   name="is_organizational_approver" {% if assignment.is_organizational_approver %}checked{% endif %}>
+                            <label class="form-check-label" for="is_organizational_approver">
+                                Organizational Approver
+                            </label>
+                            <div class="form-text">
+                                Can approve requests across multiple units
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Save Changes
+                        </button>
+                        <a href="{% url 'organization_users' org_id=organization.id %}" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border: none;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        padding: 1rem 1.5rem;
+    }
+    .card-title {
+        color: #1F2937;
+        font-size: 1.25rem;
+        font-weight: bold;
+        margin: 0;
+    }
+    .form-check {
+        margin-bottom: 1rem;
+    }
+    .form-text {
+        color: #6B7280;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+    dt {
+        font-weight: 600;
+        color: #4B5563;
+    }
+    dd {
+        margin-bottom: 0.5rem;
+    }
+    .badge {
+        font-size: 0.875rem;
+        padding: 0.5em 0.75em;
+        border-radius: 0.375rem;
+    }
+</style>
+{% endblock %} 

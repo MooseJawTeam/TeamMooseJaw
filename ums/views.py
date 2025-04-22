@@ -19,6 +19,7 @@ from .models import (
     UserOrganizationAssignment,
     TermWithdrawalForm,
     ApprovalDelegation,
+    VeteranCertificationForm,
 )
 from .decorators import role_required
 from django.contrib import messages
@@ -62,33 +63,63 @@ def user(request):
 
     user = Users.objects.get(id=user_id)
 
+    # Get user's own pending RCE forms
+    user_pending_rce_forms = RCEForm.objects.filter(
+        user_id=user_id,
+        status='pending'
+    ).order_by('-submitted_at')
+
+    # Get user's own pending Term Withdrawal forms
+    user_pending_term_withdrawal_forms = TermWithdrawalForm.objects.filter(
+        user_id=user_id,
+        status='pending'
+    ).order_by('-submitted_at')
+
+    # Get user's own pending Special Circumstance forms
+    user_pending_special_forms = SpecialCircumstanceForm.objects.filter(
+        user_id=user_id,
+        status='pending'
+    ).order_by('-submitted_at')
+
+    # Get user's own pending Veteran Certification forms
+    user_pending_veteran_forms = VeteranCertificationForm.objects.filter(
+        user_id=user_id,
+        status='pending'
+    ).order_by('-submitted_at')
+
+    # Get forms the user can approve
     delegators = get_actual_approvers(user)
     user_ids = [user.id] + [u.id for u in delegators]
-
     assignments = UserOrganizationAssignment.objects.filter(user_id__in=user_ids)
     approvable_units = assignments.filter(is_approver=True).values_list('organizational_unit_id', flat=True)
-
-    # RCE and Special forms that the user is authorized to approve
+    
+    # Get pending RCE forms for approval
     pending_rce_forms = RCEForm.objects.filter(
         status='pending',
         organizational_unit_id__in=approvable_units
-    ).order_by('-submitted_at')
+    ).exclude(user_id=user_id).order_by('-submitted_at')
 
+    # Get pending Special Circumstance forms for approval
     pending_special_forms = SpecialCircumstanceForm.objects.filter(
         status='pending',
         organizational_unit_id__in=approvable_units
-    ).order_by('-submitted_at')
+    ).exclude(user_id=user_id).order_by('-submitted_at')
 
-    # Get all term withdrawal forms for the user
-    term_withdrawal_forms = TermWithdrawalForm.objects.filter(
-        user_id=user_id
-    ).order_by('-submitted_at')
+    # Get pending Veteran Certification forms for approval
+    pending_veteran_forms = VeteranCertificationForm.objects.filter(
+        status='pending',
+        organizational_unit_id__in=approvable_units
+    ).exclude(user_id=user_id).order_by('-submitted_at')
 
     context = {
         "user": user_data,
+        "user_pending_rce_forms": user_pending_rce_forms,
+        "user_pending_term_withdrawal_forms": user_pending_term_withdrawal_forms,
+        "user_pending_special_forms": user_pending_special_forms,
+        "user_pending_veteran_forms": user_pending_veteran_forms,
         "pending_rce_forms": pending_rce_forms,
         "pending_special_forms": pending_special_forms,
-        "term_withdrawal_forms": term_withdrawal_forms
+        "pending_veteran_forms": pending_veteran_forms
     }
 
     return render(request, "ums/user.html", context)
@@ -694,9 +725,21 @@ def user_requests(request):
         user_id=user_id
     ).order_by('-submitted_at')
     
+    # Get all Term Withdrawal forms for the user
+    term_withdrawal_forms = TermWithdrawalForm.objects.filter(
+        user_id=user_id
+    ).order_by('-submitted_at')
+    
+    # Get all Veteran Certification forms for the user
+    veteran_forms = VeteranCertificationForm.objects.filter(
+        user_id=user_id
+    ).order_by('-submitted_at')
+    
     context = {
         "rce_forms": rce_forms,
-        "special_forms": special_forms
+        "special_forms": special_forms,
+        "term_withdrawal_forms": term_withdrawal_forms,
+        "veteran_forms": veteran_forms
     }
     
     return render(request, "ums/user_requests.html", context)
@@ -1269,3 +1312,31 @@ def review_term_withdrawal(request, form_id):
         'form': form,
         'org_context': org_context
     })
+
+def veteran_certification(request):
+    if request.method == 'POST':
+        # Get organizational unit
+        org_unit_id = request.POST.get('organizational_unit')
+        org_unit = None
+        if org_unit_id:
+            org_unit = OrganizationalUnit.objects.get(id=org_unit_id)
+            
+        VeteranCertificationForm.objects.create(
+            user_id=request.session['user_id'],
+            phone=request.POST['phone'],
+            academic_career=request.POST['academic_career'],
+            va_chapter=request.POST['va_chapter'],
+            va_counselor_email=request.POST['va_counselor_email'],
+            va_authorization_no=request.POST['va_authorization_no'],
+            intended_major=request.POST.get('intended_major', ''),
+            first_time_using=request.POST['first_time_using'],
+            certified_hours=request.POST['certified_hours'],
+            final_semester=request.POST['final_semester'],
+            organizational_unit=org_unit
+        )
+        messages.success(request, "Veteran Certification form submitted successfully!")
+        return redirect('user')
+        
+    # Get organizations for form selection
+    organizations = OrganizationalUnit.objects.all()
+    return render(request, 'forms/veteran_certification.html', {"organizations": organizations})

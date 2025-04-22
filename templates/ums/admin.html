@@ -2,10 +2,59 @@
 {% load static %}
 
 {% block content %}
-<div class="container">
+<div class="container-fluid">
     <div class="row">
-        <div class="col-12">
-            <h2 class="mb-4">Admin Dashboard</h2>
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+            <div class="position-sticky pt-3">
+                <div class="sidebar-header mb-3">
+                    <h5 class="text-white">Admin Navigation</h5>
+                </div>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'admin_dashboard' %}">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'delegate_approval' %}">
+                            <i class="fas fa-user-check me-2"></i>Delegate Approval
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'organization_list' %}">
+                            <i class="fas fa-sitemap me-2"></i>Organizations
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'approver_list' %}">
+                            <i class="fas fa-user-shield me-2"></i>Approvers
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'organization_hierarchy' %}">
+                            <i class="fas fa-project-diagram me-2"></i>Organization Hierarchy
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'upload_signature' %}">
+                            <i class="fas fa-signature me-2"></i>Upload Signature
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'document_list' %}">
+                            <i class="fas fa-file-alt me-2"></i>Documents
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Admin Dashboard</h1>
+            </div>
             
             <!-- Pending Forms Section -->
             <div class="row mb-4">
@@ -19,9 +68,6 @@
                         </div>
                         <div class="card-body">
                             {% if pending_rce_forms %}
-                            <div class="alert alert-info">
-                                These RCE requests may include forms delegated to you for approval.
-                            </div>
                                 <div class="table-responsive">
                                     <table class="table">
                                         <thead>
@@ -67,9 +113,6 @@
                         </div>
                         <div class="card-body">
                             {% if pending_special_forms %}
-                            <div class="alert alert-info">
-                                These Special Circumstance requests may include forms delegated to you for approval.
-                            </div>
                                 <div class="table-responsive">
                                     <table class="table">
                                         <thead>
@@ -226,32 +269,34 @@
                 </div>
                 <div class="card-body">
                     {% if active_delegations %}
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Delegator</th>
-                                    <th>Delegate</th>
-                                    <th>Start Date</th>
-                                    <th>End Date</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for delegation in active_delegations %}
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
                                     <tr>
-                                        <td>{{ delegation.delegator.name }}</td>
-                                        <td>{{ delegation.delegatee.name }}</td>
-                                        <td>{{ delegation.start_date|date:"Y-m-d" }}</td>
-                                        <td>
-                                            {% if delegation.end_date %}
-                                                {{ delegation.end_date|date:"Y-m-d" }}
-                                            {% else %}
-                                                <span class="text-muted">No end date</span>
-                                            {% endif %}
-                                        </td>
+                                        <th>Delegator</th>
+                                        <th>Delegate</th>
+                                        <th>Start Date</th>
+                                        <th>End Date</th>
                                     </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {% for delegation in active_delegations %}
+                                        <tr>
+                                            <td>{{ delegation.delegator.name }}</td>
+                                            <td>{{ delegation.delegatee.name }}</td>
+                                            <td>{{ delegation.start_date|date:"Y-m-d" }}</td>
+                                            <td>
+                                                {% if delegation.end_date %}
+                                                    {{ delegation.end_date|date:"Y-m-d" }}
+                                                {% else %}
+                                                    <span class="text-muted">No end date</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     {% else %}
                         <p class="text-muted">No active approval delegations.</p>
                     {% endif %}
@@ -304,6 +349,52 @@
 
 {% block extra_js %}
 <style>
+    .sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 100;
+        padding: 48px 0 0;
+        box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+        background-color: #1F2937;
+    }
+
+    .sidebar-header {
+        padding: 0 1rem;
+    }
+
+    .sidebar .nav-link {
+        font-weight: 500;
+        color: #E5E7EB;
+        padding: 0.75rem 1rem;
+        border-radius: 0.25rem;
+        margin: 0.25rem 0.5rem;
+    }
+
+    .sidebar .nav-link.active {
+        background-color: #374151;
+        color: #FFFFFF;
+    }
+
+    .sidebar .nav-link:hover {
+        background-color: #374151;
+        color: #FFFFFF;
+    }
+
+    .sidebar .nav-link i {
+        margin-right: 8px;
+        color: #9CA3AF;
+    }
+
+    .sidebar .nav-link.active i {
+        color: #FFFFFF;
+    }
+
+    .main-content {
+        margin-left: 250px;
+    }
+
     .card {
         margin-bottom: 1rem;
     }

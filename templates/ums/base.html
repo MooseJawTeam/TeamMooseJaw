@@ -35,16 +35,17 @@
         }
 
         .navbar {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            padding: 1rem 0;
+            background-color: #1F2937;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 0.5rem 1rem;
         }
 
         .navbar-brand {
             font-weight: 600;
-            font-size: 1.5rem;
+            font-size: 1.25rem;
             color: white !important;
             transition: transform 0.3s ease;
+            margin: 0;
         }
 
         .navbar-brand:hover {
@@ -171,33 +172,170 @@
             color: white;
         }
 
-        /* Loading animation */
-        .loading-indicator {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-            transform: translateX(-100%);
-            animation: loading 1s infinite;
-            z-index: 9999;
+        /* Admin specific styles */
+        .admin-layout {
+            background-color: #f3f4f6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
         }
 
-        @keyframes loading {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
+        .admin-layout .navbar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 0;
+            z-index: 1030;
+            background-color: #1F2937;
+            padding: 0.5rem 1rem;
+            height: 56px;
+            display: flex;
+            align-items: center;
+        }
+
+        .admin-layout .navbar .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 100%;
+            padding: 0 1rem;
+        }
+
+        .admin-layout .navbar-brand {
+            color: white !important;
+            font-size: 1.25rem;
+            margin: 0;
+        }
+
+        .admin-layout .sidebar {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 1000;
+            width: 250px;
+            background-color: #1F2937;
+            padding: 1rem 0;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+        }
+
+        .admin-layout .sidebar.collapsed {
+            width: 60px;
+        }
+
+        .admin-layout .sidebar.collapsed .nav-link span {
+            display: none;
+        }
+
+        .admin-layout .sidebar.collapsed .nav-link {
+            padding: 0.75rem;
+            text-align: center;
+        }
+
+        .admin-layout .sidebar.collapsed .nav-link i {
+            margin-right: 0;
+            font-size: 1.2rem;
+        }
+
+        .admin-layout .main-content {
+            margin-left: 250px;
+            padding: 2rem;
+            min-height: 100vh;
+            background-color: #f3f4f6;
+            width: calc(100% - 250px);
+            transition: all 0.3s ease;
+        }
+
+        .admin-layout .main-content.expanded {
+            margin-left: 60px;
+            width: calc(100% - 60px);
+        }
+
+        .sidebar-toggle {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1001;
+            background-color: #1F2937;
+            border: none;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-toggle:hover {
+            background-color: #374151;
+        }
+
+        .sidebar-toggle i {
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-toggle.collapsed i {
+            transform: rotate(180deg);
+        }
+
+        /* Regular user layout */
+        .regular-layout {
+            background-color: #f3f4f6;
+            min-height: 100vh;
+        }
+
+        .regular-layout .content {
+            padding: 2rem 0;
+            min-height: calc(100vh - 76px);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .admin-layout .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .admin-layout .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .admin-layout .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+
+        /* Card styles */
+        .card {
+            border: none;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1rem 1.5rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
         }
     </style>
 </head>
-<body>
-    <!-- Loading Indicator -->
-    <div class="loading-indicator"></div>
+<body class="{% if request.session.user_role == 'Admin' %}admin-layout{% else %}regular-layout{% endif %}">
+    <!-- Remove loading indicator -->
+    <!-- <div class="loading-indicator"></div> -->
 
     <!-- Navigation -->
+    {% if not request.session.user_role == 'Admin' %}
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
-            <a class="navbar-brand" href="{% if request.session.user_role == 'Admin' %}{% url 'admin_dashboard' %}{% else %}{% url 'user' %}{% endif %}">
+            <a class="navbar-brand" href="{% url 'user' %}">
                 <i class="fas fa-university me-2"></i>UMS
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -216,18 +354,6 @@
                                 <i class="fas fa-list-check"></i>My Requests
                             </a>
                         </li>
-                        {% if request.session.user_role == 'Admin' %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'admin_dashboard' %}">
-                                    <i class="fas fa-tachometer-alt"></i>User Management
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'template_list' %}">
-                                    <i class="fas fa-file-code"></i>Manage Templates
-                                </a>
-                            </li>
-                        {% endif %}
                     {% endif %}
                 </ul>
                 <ul class="navbar-nav">
@@ -247,6 +373,7 @@
             </div>
         </div>
     </nav>
+    {% endif %}
 
     <!-- Messages -->
     {% if messages %}
@@ -270,9 +397,70 @@
     {% endif %}
 
     <!-- Main Content -->
-    <div class="content">
-        {% block content %}
-        {% endblock %}
+    <div class="{% if request.session.user_role == 'Admin' %}admin-layout{% else %}regular-layout{% endif %}">
+        {% if request.session.user_role == 'Admin' %}
+        <!-- Admin Sidebar -->
+        <button class="sidebar-toggle" id="sidebarToggle">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <div class="sidebar" id="sidebar">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <div class="nav-link text-white">
+                        <i class="fas fa-user me-2"></i><span>{{ request.session.user_name }}</span>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.path == '/admin_dashboard/' %}active{% endif %}" href="{% url 'admin_dashboard' %}">
+                        <i class="fas fa-tachometer-alt me-2"></i><span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.path == '/delegate_approval/' %}active{% endif %}" href="{% url 'delegate_approval' %}">
+                        <i class="fas fa-user-check me-2"></i><span>Delegate Approval</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.path == '/organizations/' %}active{% endif %}" href="{% url 'organization_list' %}">
+                        <i class="fas fa-sitemap me-2"></i><span>Organizations</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.path == '/approvers/' %}active{% endif %}" href="{% url 'approver_list' %}">
+                        <i class="fas fa-user-shield me-2"></i><span>Approvers</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.path == '/organization/hierarchy/' %}active{% endif %}" href="{% url 'organization_hierarchy' %}">
+                        <i class="fas fa-project-diagram me-2"></i><span>Organization Hierarchy</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.path == '/templates/' %}active{% endif %}" href="{% url 'template_list' %}">
+                        <i class="fas fa-file-code me-2"></i><span>Manage Templates</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.path == '/documents/' %}active{% endif %}" href="{% url 'document_list' %}">
+                        <i class="fas fa-file-alt me-2"></i><span>My Documents</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.path == '/requests/' %}active{% endif %}" href="{% url 'user_requests' %}">
+                        <i class="fas fa-list-check me-2"></i><span>My Requests</span>
+                    </a>
+                </li>
+                <li class="nav-item mt-auto">
+                    <a class="nav-link text-danger" href="{% url 'logout' %}">
+                        <i class="fas fa-sign-out-alt me-2"></i><span>Logout</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        {% endif %}
+        <div class="{% if request.session.user_role == 'Admin' %}main-content{% else %}content{% endif %}" id="mainContent">
+            {% block content %}{% endblock %}
+        </div>
     </div>
 
     <!-- Bootstrap JS -->
@@ -280,25 +468,29 @@
     <!-- jQuery (if needed) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        // Add loading indicator for all navigation links
         document.addEventListener('DOMContentLoaded', function() {
-            const loadingIndicator = document.querySelector('.loading-indicator');
-            const navLinks = document.querySelectorAll('.nav-link');
-            
-            navLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    // Only handle internal links
-                    if (this.href && this.href.startsWith(window.location.origin)) {
-                        loadingIndicator.style.display = 'block';
-                        loadingIndicator.style.animation = 'loading 1s infinite';
-                    }
-                });
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const toggleButton = document.getElementById('sidebarToggle');
+            let isCollapsed = false;
+
+            // Check localStorage for saved state
+            if (localStorage.getItem('sidebarCollapsed') === 'true') {
+                toggleSidebar();
+            }
+
+            toggleButton.addEventListener('click', function() {
+                toggleSidebar();
+                // Save state to localStorage
+                localStorage.setItem('sidebarCollapsed', isCollapsed);
             });
 
-            // Hide loading indicator when page is fully loaded
-            window.addEventListener('load', function() {
-                loadingIndicator.style.display = 'none';
-            });
+            function toggleSidebar() {
+                isCollapsed = !isCollapsed;
+                sidebar.classList.toggle('collapsed');
+                mainContent.classList.toggle('expanded');
+                toggleButton.classList.toggle('collapsed');
+            }
         });
     </script>
     {% block extra_js %}{% endblock %}

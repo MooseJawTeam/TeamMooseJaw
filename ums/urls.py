@@ -30,6 +30,7 @@ urlpatterns = [
     path("submit/rce/", views.submit_rce_form, name="submit_rce"),
     path("submit/special/", views.submit_special_form, name="submit_special"),
     path('term-withdrawal/', submit_term_withdrawal, name='submit_term_withdrawal'),
+    path('veteran-certification/', views.veteran_certification, name='veteran_certification'),
 
     # 🔹 Form Review Routes
     path("review/rce/<int:form_id>/", views.review_rce_form, name="review_rce"),

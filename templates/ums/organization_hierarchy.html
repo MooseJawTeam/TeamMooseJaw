@@ -1,0 +1,109 @@
+{% extends 'ums/base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-project-diagram me-2"></i>Organization Hierarchy
+                    </h2>
+                </div>
+                <div class="card-body">
+                    {% if trees %}
+                        <div class="organization-tree">
+                            {% for tree in trees %}
+                                <div class="organization-node root">
+                                    <div class="node-content">
+                                        <h4>{{ tree.root.name }}</h4>
+                                        <p class="text-muted">{{ tree.root.description }}</p>
+                                    </div>
+                                    {% if tree.tree %}
+                                        <div class="children">
+                                            {% for node in tree.tree %}
+                                                {% if node.parent == tree.root %}
+                                                    <div class="organization-node">
+                                                        <div class="node-content">
+                                                            <h5>{{ node.name }}</h5>
+                                                            <p class="text-muted">{{ node.description }}</p>
+                                                        </div>
+                                                        {% if node.children.all %}
+                                                            <div class="children">
+                                                                {% for child in node.children.all %}
+                                                                    <div class="organization-node">
+                                                                        <div class="node-content">
+                                                                            <h6>{{ child.name }}</h6>
+                                                                            <p class="text-muted">{{ child.description }}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                {% endfor %}
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>No organizations found.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .organization-tree {
+        padding: 20px;
+    }
+
+    .organization-node {
+        margin-bottom: 20px;
+        padding: 15px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background-color: #ffffff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    .organization-node:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .organization-node.root {
+        background-color: #f8f9fa;
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .node-content {
+        margin-bottom: 10px;
+    }
+
+    .children {
+        margin-left: 30px;
+        padding-left: 20px;
+        border-left: 2px solid #e5e7eb;
+    }
+
+    .organization-node h4,
+    .organization-node h5,
+    .organization-node h6 {
+        margin: 0;
+        color: var(--text-color);
+    }
+
+    .organization-node .text-muted {
+        font-size: 0.9rem;
+        margin: 5px 0 0 0;
+    }
+</style>
+{% endblock %} 

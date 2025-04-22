@@ -290,3 +290,30 @@ class ApprovalDelegation(models.Model):
 
     def __str__(self):
         return f"{self.delegator.name} delegated to {self.delegatee.name}"
+
+class VeteranCertificationForm(models.Model):
+    user = models.ForeignKey(Users, on_delete=models.CASCADE)
+    phone = models.CharField(max_length=20)
+    academic_career = models.CharField(max_length=10, choices=[('UGRD', 'UGRD'), ('GRAD', 'GRAD')])
+    va_chapter = models.CharField(max_length=20, choices=[('Chapter 31', 'Chapter 31'), ('Chapter 33', 'Chapter 33')])
+    va_counselor_email = models.EmailField()
+    va_authorization_no = models.CharField(max_length=50)
+    intended_major = models.CharField(max_length=100, blank=True)
+    first_time_using = models.CharField(max_length=3, choices=[('Yes', 'Yes'), ('No', 'No')])
+    certified_hours = models.IntegerField()
+    final_semester = models.CharField(max_length=3, choices=[('Yes', 'Yes'), ('No', 'No')])
+    organizational_unit = models.ForeignKey(OrganizationalUnit, on_delete=models.SET_NULL, null=True)
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('pending', 'Pending'),
+            ('approved', 'Approved'),
+            ('denied', 'Denied')
+        ],
+        default='pending'
+    )
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        org_unit = f" ({self.organizational_unit.name})" if self.organizational_unit else ""
+        return f"Veteran Certification Form for {self.user.name} ({self.user.email}){org_unit}"

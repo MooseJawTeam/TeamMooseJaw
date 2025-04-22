@@ -1,0 +1,93 @@
+{% extends "ums/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">Approver Management</h2>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-user-shield me-2"></i>Approvers
+                    </h3>
+                </div>
+                <div class="card-body">
+                    {% if approvers_by_user %}
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Organizations</th>
+                                        <th>Approver Type</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for approver_data in approvers_by_user.values %}
+                                        <tr>
+                                            <td>{{ approver_data.user.name }}</td>
+                                            <td>
+                                                {% for assignment in approver_data.assignments %}
+                                                    {{ assignment.organizational_unit.name }}
+                                                    {% if not forloop.last %}, {% endif %}
+                                                {% endfor %}
+                                            </td>
+                                            <td>
+                                                {% for assignment in approver_data.assignments %}
+                                                    {% if assignment.is_organizational_approver %}
+                                                        Organizational Approver
+                                                    {% else %}
+                                                        Unit Approver
+                                                    {% endif %}
+                                                    {% if not forloop.last %}, {% endif %}
+                                                {% endfor %}
+                                            </td>
+                                            <td>
+                                                {% for assignment in approver_data.assignments %}
+                                                    <a href="{% url 'organization_users' assignment.organizational_unit.id %}" class="btn btn-sm btn-primary me-1">
+                                                        <i class="fas fa-edit"></i> Manage {{ assignment.organizational_unit.name }}
+                                                    </a>
+                                                {% endfor %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No approvers found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<style>
+    .card {
+        margin-bottom: 1rem;
+    }
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .card-title {
+        color: #1F2937;
+        font-size: 1.25rem;
+        font-weight: bold;
+    }
+    .table th {
+        font-weight: 600;
+        color: #4B5563;
+    }
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+</style>
+{% endblock %} 
