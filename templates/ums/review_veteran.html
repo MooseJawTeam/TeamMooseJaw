@@ -1,0 +1,140 @@
+{% extends "ums/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">Review Veteran Certification Request</h2>
+            <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <!-- Form Information -->
+                <div class="col-md-6 mb-4">
+                    <h4>Request Information</h4>
+                    <table class="table table-borderless">
+                        <tr>
+                            <th>Student Name:</th>
+                            <td>{{ form.user.name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Student Email:</th>
+                            <td>{{ form.user.email }}</td>
+                        </tr>
+                        <tr>
+                            <th>Phone:</th>
+                            <td>{{ form.phone }}</td>
+                        </tr>
+                        <tr>
+                            <th>Academic Career:</th>
+                            <td>{{ form.academic_career }}</td>
+                        </tr>
+                        <tr>
+                            <th>VA Chapter:</th>
+                            <td>{{ form.va_chapter }}</td>
+                        </tr>
+                        <tr>
+                            <th>VA Counselor Email:</th>
+                            <td>{{ form.va_counselor_email }}</td>
+                        </tr>
+                        <tr>
+                            <th>VA Authorization No:</th>
+                            <td>{{ form.va_authorization_no }}</td>
+                        </tr>
+                        <tr>
+                            <th>Intended Major:</th>
+                            <td>{{ form.intended_major|default:"Not specified" }}</td>
+                        </tr>
+                        <tr>
+                            <th>First Time Using Benefits:</th>
+                            <td>{{ form.first_time_using }}</td>
+                        </tr>
+                        <tr>
+                            <th>Certified Hours:</th>
+                            <td>{{ form.certified_hours }}</td>
+                        </tr>
+                        <tr>
+                            <th>Final Semester:</th>
+                            <td>{{ form.final_semester }}</td>
+                        </tr>
+                        <tr>
+                            <th>Submitted On:</th>
+                            <td>{{ form.submitted_at|date:"F j, Y, g:i a" }}</td>
+                        </tr>
+                        {% if form.organizational_unit %}
+                        <tr>
+                            <th>Department/College:</th>
+                            <td>{{ form.organizational_unit.name }}</td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+                
+                <!-- Review Form -->
+                <div class="col-md-6">
+                    <h4>Review Decision</h4>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Decision</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="decision" id="decision_pass" value="Pass" required>
+                                <label class="form-check-label" for="decision_pass">
+                                    <span class="badge bg-success">Pass</span> - Approve this request
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="decision" id="decision_fail" value="Fail">
+                                <label class="form-check-label" for="decision_fail">
+                                    <span class="badge bg-danger">Fail</span> - Deny this request
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="comments" class="form-label">Comments (Optional)</label>
+                            <textarea class="form-control" id="comments" name="comments" rows="3"></textarea>
+                            <div class="form-text">Your comments will be included in the decision document.</div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" name="action" value="approve" class="btn btn-success">
+                                <i class="fas fa-check-circle me-2"></i>Approve Request
+                            </button>
+                            <button type="submit" name="action" value="deny" class="btn btn-danger">
+                                <i class="fas fa-times-circle me-2"></i>Deny Request
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            {% if org_context %}
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h5 class="card-title">Organizational Context</h5>
+                            <p>This request belongs to: <strong>{{ org_context.unit.name }}</strong></p>
+                            
+                            {% if org_context.ancestors %}
+                            <p>Organizational Hierarchy:</p>
+                            <ol class="breadcrumb">
+                                {% for ancestor in org_context.ancestors %}
+                                <li class="breadcrumb-item">{{ ancestor.name }}</li>
+                                {% endfor %}
+                                <li class="breadcrumb-item active">{{ org_context.unit.name }}</li>
+                            </ol>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -312,6 +312,15 @@ class VeteranCertificationForm(models.Model):
         ],
         default='pending'
     )
+    decision = models.CharField(
+        max_length=10,
+        choices=[
+            ('Pass', 'Pass'),
+            ('Fail', 'Fail')
+        ],
+        blank=True,
+        null=True
+    )
     submitted_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

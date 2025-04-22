@@ -17,23 +17,33 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'delegate_approval' %}">
-                            <i class="fas fa-user-check me-2"></i>Delegate Approval
-                        </a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link" href="{% url 'organization_list' %}">
-                            <i class="fas fa-sitemap me-2"></i>Organizations
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'approver_list' %}">
-                            <i class="fas fa-user-shield me-2"></i>Approvers
+                            <i class="fas fa-building me-2"></i>Organizations
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'organization_hierarchy' %}">
-                            <i class="fas fa-project-diagram me-2"></i>Organization Hierarchy
+                            <i class="fas fa-sitemap me-2"></i>Organization Hierarchy
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'all_requests' %}">
+                            <i class="fas fa-list me-2"></i>All Requests
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'template_list' %}">
+                            <i class="fas fa-file-code me-2"></i>Manage Templates
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'document_list' %}">
+                            <i class="fas fa-file-alt me-2"></i>All Documents
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'user_requests' %}">
+                            <i class="fas fa-list-check me-2"></i>My Requests
                         </a>
                     </li>
                     <li class="nav-item">
@@ -42,8 +52,23 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'document_list' %}">
-                            <i class="fas fa-file-alt me-2"></i>Documents
+                        <a class="nav-link" href="{% url 'approver_list' %}">
+                            <i class="fas fa-user-shield me-2"></i>Approvers
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'delegate_approval' %}">
+                            <i class="fas fa-user-check me-2"></i>Delegate Approval
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'user' %}">
+                            <i class="fas fa-tachometer-alt me-2"></i>User Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-danger" href="{% url 'logout' %}">
+                            <i class="fas fa-sign-out-alt me-2"></i>Logout
                         </a>
                     </li>
                 </ul>
@@ -149,7 +174,7 @@
                 </div>
             </div>
             
-            <!-- Pending Term Withdrawal Forms -->
+            <!-- Pending Term Withdrawal Forms and Veteran Certification Forms -->
             <div class="row mb-4">
                 <div class="col-md-6">
                     <div class="card">
@@ -190,6 +215,51 @@
                                 </div>
                             {% else %}
                                 <p class="text-muted">No pending term withdrawal requests.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Pending Veteran Certification Forms -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title mb-0">
+                                <i class="fas fa-file-alt me-2"></i>Pending Veteran Certifications
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            {% if pending_veteran_forms %}
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Student</th>
+                                                <th>VA Chapter</th>
+                                                <th>Hours</th>
+                                                <th>Submitted</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for form in pending_veteran_forms %}
+                                            <tr>
+                                                <td>{{ form.user.name }}</td>
+                                                <td>{{ form.va_chapter }}</td>
+                                                <td>{{ form.certified_hours }}</td>
+                                                <td>{{ form.submitted_at|date:"Y-m-d H:i" }}</td>
+                                                <td>
+                                                    <a href="{% url 'review_veteran' form.id %}" class="btn btn-sm btn-primary">
+                                                        Review
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <p class="text-muted">No pending veteran certification requests.</p>
                             {% endif %}
                         </div>
                     </div>

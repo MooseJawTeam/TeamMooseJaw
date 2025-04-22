@@ -37,6 +37,7 @@ urlpatterns = [
     path("review/special/<int:form_id>/", views.review_special_form, name="review_special"),
     path("view/<str:form_type>/<int:form_id>/", views.view_form, name="view_form"),
     path("review/term-withdrawal/<int:form_id>/", views.review_term_withdrawal, name="review_term_withdrawal"),
+    path("review/veteran/<int:form_id>/", views.review_veteran_form, name="review_veteran"),
 
     # 🔹 User Requests Route
     path("requests/", views.user_requests, name="user_requests"),
