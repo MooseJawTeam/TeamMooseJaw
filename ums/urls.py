@@ -1,7 +1,7 @@
 from django.urls import path
 from . import views
 from . import view_document
-from .views import submit_term_withdrawal
+from .views import submit_term_withdrawal, delegate_approval
 
 
 urlpatterns = [
@@ -57,5 +57,8 @@ urlpatterns = [
     # 🔹 Approver Management
     path("approvers/", views.approver_list, name="approver_list"),
     path("approvers/manage/<str:user_id>/<int:org_id>/", views.manage_approver, name="manage_approver"),
+
+    # 🔹 Delegation Management
+    path("delegate/", delegate_approval, name="delegate_approval"),
 ]
 

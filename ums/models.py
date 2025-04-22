@@ -276,3 +276,17 @@ class TermWithdrawalForm(models.Model):
         org_unit = f" ({self.organizational_unit.name})" if self.organizational_unit else ""
         return f"Term Withdrawal Form - {self.user.name} - {self.withdrawal_term} {self.withdrawal_year}{org_unit}"
 
+class ApprovalDelegation(models.Model):
+    """Model to track delegation of approval authority"""
+    delegator = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='delegated_approvals')
+    delegatee = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='received_delegations')
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField(null=True, blank=True)
+    active = models.BooleanField(default=True)
+
+    def is_active(self):
+        today = timezone.now().date()
+        return self.active and self.start_date <= today and (self.end_date is None or today <= self.end_date)
+
+    def __str__(self):
+        return f"{self.delegator.name} delegated to {self.delegatee.name}"

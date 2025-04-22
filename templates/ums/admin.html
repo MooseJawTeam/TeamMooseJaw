@@ -19,6 +19,9 @@
                         </div>
                         <div class="card-body">
                             {% if pending_rce_forms %}
+                            <div class="alert alert-info">
+                                These RCE requests may include forms delegated to you for approval.
+                            </div>
                                 <div class="table-responsive">
                                     <table class="table">
                                         <thead>
@@ -64,6 +67,9 @@
                         </div>
                         <div class="card-body">
                             {% if pending_special_forms %}
+                            <div class="alert alert-info">
+                                These Special Circumstance requests may include forms delegated to you for approval.
+                            </div>
                                 <div class="table-responsive">
                                     <table class="table">
                                         <thead>
@@ -208,6 +214,47 @@
                             </tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+
+            <!-- Active Approval Delegations Section -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-user-check me-2"></i>Active Approval Delegations
+                    </h3>
+                </div>
+                <div class="card-body">
+                    {% if active_delegations %}
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Delegator</th>
+                                    <th>Delegate</th>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for delegation in active_delegations %}
+                                    <tr>
+                                        <td>{{ delegation.delegator.name }}</td>
+                                        <td>{{ delegation.delegatee.name }}</td>
+                                        <td>{{ delegation.start_date|date:"Y-m-d" }}</td>
+                                        <td>
+                                            {% if delegation.end_date %}
+                                                {{ delegation.end_date|date:"Y-m-d" }}
+                                            {% else %}
+                                                <span class="text-muted">No end date</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p class="text-muted">No active approval delegations.</p>
+                    {% endif %}
                 </div>
             </div>
         </div>
