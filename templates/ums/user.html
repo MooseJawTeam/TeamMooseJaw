@@ -28,6 +28,10 @@
                                 <span class="badge {% if user.status == 'Active' %}bg-success{% else %}bg-danger{% endif %}">
                                     {{user.status}}
                                 </span>
+                                <a href="{% url 'delegate_approval' %}" class="btn btn-outline-secondary mt-2">
+                                    <i class="fas fa-random me-1"></i> Delegate Approval
+                                </a>
+                                
                             </p>
                         </div>
                     </div>

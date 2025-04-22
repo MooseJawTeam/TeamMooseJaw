@@ -30,6 +30,9 @@ import uuid
 from datetime import datetime, timezone
 from .pdf_utils import generate_pdf
 from django.template.loader import render_to_string
+from .models import ApprovalDelegation
+from django.utils import timezone 
+from datetime import datetime, timezone as dt_timezone
 
 
 
@@ -57,17 +60,25 @@ def user(request):
         "status": request.session.get("user_status", "Active")
     }
 
-    # Get pending RCE forms for the user
+    user = Users.objects.get(id=user_id)
+
+    delegators = get_actual_approvers(user)
+    user_ids = [user.id] + [u.id for u in delegators]
+
+    assignments = UserOrganizationAssignment.objects.filter(user_id__in=user_ids)
+    approvable_units = assignments.filter(is_approver=True).values_list('organizational_unit_id', flat=True)
+
+# RCE and Special forms that the user is authorized to approve
     pending_rce_forms = RCEForm.objects.filter(
-        user_id=user_id,
-        status='pending'
+    status='pending',
+    organizational_unit_id__in=approvable_units
     ).order_by('-submitted_at')
 
-    # Get pending Special Circumstance forms for the user
     pending_special_forms = SpecialCircumstanceForm.objects.filter(
-        user_id=user_id,
-        status='pending'
+    status='pending',
+    organizational_unit_id__in=approvable_units
     ).order_by('-submitted_at')
+
 
     context = {
         "user": user_data,
@@ -97,13 +108,26 @@ def admin_dashboard(request):
     
     # Get all users except the current admin
     users = Users.objects.exclude(id=request.session["user_id"]).order_by("name")
-    
+    ###
+
+
+# Fetch all active delegations
+    now = timezone.now()
+    active_delegations = ApprovalDelegation.objects.filter(active=True,start_date__lte=now).filter(Q(end_date__isnull=True) | Q(end_date__gte=now)).select_related('delegator', 'delegatee')
+
+    delegators = get_actual_approvers(current_user)
+    user_ids = [current_user.id] + [u.id for u in delegators]
+
+    assignments = UserOrganizationAssignment.objects.filter(user_id__in=user_ids)
+    approvable_units = assignments.filter(is_approver=True).values_list('organizational_unit_id', flat=True)
+
     # Get pending RCE forms
     pending_rce_forms = RCEForm.objects.filter(status='pending').select_related('user').order_by('-submitted_at')
-    
+
+
     # Get pending Special Circumstance forms
     pending_special_forms = SpecialCircumstanceForm.objects.filter(status='pending').select_related('user').order_by('-submitted_at')
-    
+ 
     # Get organizational units
     organizations = OrganizationalUnit.objects.all()
     
@@ -164,7 +188,8 @@ def admin_dashboard(request):
         "pending_rce_forms": pending_rce_forms,
         "pending_special_forms": pending_special_forms,
         "organizations": organizations,
-        "approver_assignments": approver_assignments
+        "approver_assignments": approver_assignments, 
+        "active_delegations": active_delegations,
     }
     
     return render(request, "ums/admin.html", context)
@@ -333,7 +358,7 @@ def generate_decision_document(form, decision, admin_user):
     context = {
         'document_title': f"{form.__class__.__name__} Decision",
         'document_id': str(uuid.uuid4()),
-        'generation_date': datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
+        'generation_date': datetime.now(dt_timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
         'username': form.user.name,
         'useremail': form.user.email,
         'custom_text': form.reason if hasattr(form, 'reason') else form.comments,
@@ -373,14 +398,43 @@ def generate_decision_document(form, decision, admin_user):
     except Exception as e:
         print(f"Error generating document: {str(e)}")  # Debug print
         raise Exception(f"Error generating document: {str(e)}")
+    
+
+
+def get_actual_approvers(user):
+    """Return a list of delegators for whom this user is an active delegate."""
+    today = timezone.now().date()
+    delegations = ApprovalDelegation.objects.filter(
+        delegatee=user,
+        active=True,
+        start_date__lte=today,
+        end_date__gte=today
+    )
+    return [d.delegator for d in delegations]
+
 
 @role_required(['Admin'])
 def review_rce_form(request, form_id):
+
     form = get_object_or_404(RCEForm, id=form_id)
     
     # Check if user has permission to review this form
     user = Users.objects.get(id=request.session['user_id'])
-    can_review = True
+    delegators = get_actual_approvers(user) 
+    user_ids = [user.id] + [u.id for u in delegators]
+
+    # Determine if the user is acting as a delegate
+  
+
+    #pull all assignments for the user + any delegators
+    #user_assignments = UserOrganizationAssignment.objects.filter(user_id__in=user_ids)
+
+    #check if this ue can approve
+    is_org_approver = False
+    is_unit_approver = False
+    is_ancestor_approver = False
+    can_review = False
+    
     
     # If form has organizational unit, check permissions
     if form.organizational_unit:
@@ -497,12 +551,24 @@ def review_special_form(request, form_id):
     
     # Check if user has permission to review this form
     user = Users.objects.get(id=request.session['user_id'])
-    can_review = True
+
+    #include delegators this user is acting for
+    delegators = get_actual_approvers(user)
+    user_ids = [user.id] + [u.id for u in delegators]
+    
+    user_assignments = UserOrganizationAssignment.objects.filter(user_id__in=user_ids)
+
+    is_org_approver = False
+    is_unit_approver = False
+    is_ancestor_approver = False
+    can_review = False
+
+
     
     # If form has organizational unit, check permissions
     if form.organizational_unit:
         # Get all user's organization assignments
-        user_assignments = UserOrganizationAssignment.objects.filter(user=user)
+       #user_assignments = UserOrganizationAssignment.objects.filter(user=user)<- commented out becase it overwrites the deleagation aware query
         
         # Check if user is an organizational approver in any relevant unit
         is_org_approver = user_assignments.filter(
@@ -965,3 +1031,30 @@ def manage_approver(request, user_id, org_id):
         "assignment": assignment
     })
 
+@role_required(['Admin', 'Basicuser'])
+def delegate_approval(request):
+    if request.method == "POST":
+        delegatee_id = request.POST.get("delegatee")
+        start_date = request.POST.get("start_date")
+        end_date = request.POST.get("end_date")
+
+        try:
+            start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
+            end_date = datetime.strptime(end_date, "%Y-%m-%d").date() if end_date else None
+
+            ApprovalDelegation.objects.create(
+                delegator_id=request.session['user_id'],
+                delegatee_id=delegatee_id,
+                start_date=start_date,
+                end_date=end_date,
+                active=True
+            )
+
+            messages.success(request, "Delegation created successfully.")
+            return redirect("user")
+        except Exception as e:
+            print(f"Delegation error: {str(e)}")
+            messages.error(request, "There was a problem creating the delegation. Please check the input.")
+
+    users = Users.objects.exclude(id=request.session['user_id'])
+    return render(request, "ums/delegate_form.html", {"users": users})

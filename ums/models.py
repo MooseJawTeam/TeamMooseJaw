@@ -226,3 +226,19 @@ class SpecialCircumstanceForm(models.Model):
         org_unit = f" ({self.organizational_unit.name})" if self.organizational_unit else ""
         return f"Special Circumstance Form for {self.user.name} ({self.user.email}){org_unit}"
 
+
+#Model to track delegation relationships
+class ApprovalDelegation(models.Model):
+    """Model to track delegation of approval authority"""
+    delegator = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='delegated_approvals')
+    delegatee = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='received_delegations')
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
+    active = models.BooleanField(default=True)
+
+    def is_active(self):
+        today = timezone.now().date()
+        return self.active and self.start_date <= today <= self.end_date
+
+    def __str__(self):
+        return f"{self.delegator.name} delegated to {self.delegatee.name}"
