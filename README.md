@@ -13,7 +13,6 @@ wsl
 # Clone repo and go to django_app 
 git clone https://github.com/Nighttterrors/TeamMooseJaw.git
 cd TeamMooseJaw
-cd django_app
 
 # Install dependencies if you don't already have them
 sudo apt install python3
